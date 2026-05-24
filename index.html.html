@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>RewardHub - Earn Rewards Through Skills & Referrals</title>
-    <meta name="description" content="Complete skill-based tasks, refer friends, and earn real rewards with RewardHub" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+    <title>RewardHub - Premium Earning Platform</title>
+    <meta name="description" content="Complete tasks, earn rewards, and withdraw instantly with RewardHub" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
     <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -16,469 +17,72 @@
         }
 
         body {
-            background: #0a0c10;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #050816;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow-x: hidden;
         }
 
-        #root {
-            min-height: 100vh;
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B1220;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #22FF88;
+            border-radius: 10px;
         }
 
-        /* Modern CSS Reset and Base Styles */
-        .rewardhub-app {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0a0c10 0%, #0f1117 100%);
-            color: #ffffff;
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        /* Landing Page Styles */
-        .landing-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 40px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(10,12,16,0.9);
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
         }
 
-        .logo {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #10b981, #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .animate-pulse {
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        .btn {
-            padding: 10px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-            font-size: 14px;
+        /* Glow Effects */
+        .glow-green {
+            box-shadow: 0 0 20px rgba(34, 255, 136, 0.3);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #10b981, #06b6d4);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(16,185,129,0.3);
-        }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.2);
-        }
-
-        .hero {
-            text-align: center;
-            padding: 80px 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .hero h1 {
-            font-size: 56px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            line-height: 1.2;
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, #10b981, #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero p {
-            font-size: 18px;
-            color: #a1a5b5;
-            margin-bottom: 40px;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            padding: 60px 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .feature-card {
-            background: rgba(26,29,38,0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 32px;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(16,185,129,0.3);
-        }
-
-        .feature-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .feature-card h3 {
-            font-size: 20px;
-            margin-bottom: 12px;
-        }
-
-        .feature-card p {
-            color: #a1a5b5;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        /* Dashboard Styles */
-        .dashboard-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px 20px 100px;
-        }
-
-        .welcome-section {
-            margin-bottom: 32px;
-        }
-
-        .welcome-section h1 {
-            font-size: 32px;
-            margin-bottom: 8px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-
-        .stat-box {
-            background: rgba(26,29,38,0.8);
-            border: 1px solid rgba(255,255,255,0.1);
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #0B1220 25%, #1a1f2e 50%, #0B1220 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
             border-radius: 16px;
-            padding: 20px;
-            transition: all 0.3s;
-        }
-
-        .stat-box:hover {
-            transform: translateY(-2px);
-            border-color: rgba(16,185,129,0.3);
-        }
-
-        .stat-label {
-            font-size: 12px;
-            text-transform: uppercase;
-            color: #6b6f7e;
-            margin-bottom: 8px;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-        }
-
-        .stat-value.green { color: #10b981; }
-        .stat-value.cyan { color: #06b6d4; }
-        .stat-value.purple { color: #8b5cf6; }
-        .stat-value.amber { color: #f59e0b; }
-
-        .action-cards {
-            display: grid;
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-
-        .action-card {
-            background: rgba(26,29,38,0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .action-card:hover {
-            transform: translateX(5px);
-            border-color: #10b981;
-        }
-
-        .action-icon {
-            font-size: 32px;
-            width: 56px;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-        }
-
-        .action-content {
-            flex: 1;
-        }
-
-        .action-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .action-desc {
-            font-size: 12px;
-            color: #6b6f7e;
-        }
-
-        /* Auth Pages */
-        .auth-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .auth-card {
-            background: rgba(26,29,38,0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px;
-            padding: 40px;
-            max-width: 420px;
-            width: 100%;
-        }
-
-        .auth-logo {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #10b981, #06b6d4);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 28px;
-        }
-
-        .auth-title {
-            text-align: center;
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .auth-sub {
-            text-align: center;
-            color: #6b6f7e;
-            margin-bottom: 32px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 12px;
-            text-transform: uppercase;
-            color: #6b6f7e;
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            color: white;
-            font-size: 14px;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #10b981;
-        }
-
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(26,29,38,0.95);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            padding: 8px 16px 20px;
-            gap: 8px;
-            z-index: 100;
-        }
-
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 8px;
-            background: none;
-            border: none;
-            color: #6b6f7e;
-            cursor: pointer;
-            border-radius: 12px;
-            transition: all 0.2s;
-        }
-
-        .nav-item.active {
-            color: #10b981;
-            background: rgba(16,185,129,0.1);
-        }
-
-        .nav-icon {
-            font-size: 22px;
-        }
-
-        .nav-label {
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        /* Alert */
-        .alert {
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-        }
-
-        .alert-error {
-            background: rgba(239,68,68,0.1);
-            border: 1px solid rgba(239,68,68,0.2);
-            color: #ef4444;
-        }
-
-        /* Package Cards */
-        .package-card {
-            background: rgba(26,29,38,0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 16px;
-            position: relative;
-            transition: all 0.3s;
-        }
-
-        .package-card.popular {
-            border-color: #8b5cf6;
-            box-shadow: 0 0 20px rgba(139,92,246,0.2);
-        }
-
-        .popular-badge {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: #8b5cf6;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .package-name {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .package-price {
-            font-size: 32px;
-            font-weight: 800;
-            color: #06b6d4;
-            margin-bottom: 16px;
-        }
-
-        .package-coins {
-            background: rgba(255,255,255,0.05);
-            padding: 12px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        /* Task Filters */
-        .task-filters {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 24px;
-        }
-
-        .filter-btn {
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            color: #a1a5b5;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .filter-btn.active {
-            background: #10b981;
-            color: white;
-            border-color: #10b981;
-        }
-
-        /* Referral Code Box */
-        .referral-box {
-            background: rgba(0,0,0,0.3);
-            padding: 16px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .referral-code {
-            font-family: monospace;
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        /* Responsive */
-        @media (max-width: 640px) {
-            .hero h1 { font-size: 36px; }
-            .landing-header { padding: 16px 20px; }
-            .features { padding: 40px 20px; }
-            .auth-card { padding: 32px 24px; }
-            .stat-value { font-size: 24px; }
         }
     </style>
 </head>
@@ -488,7 +92,7 @@
     <script type="text/babel">
         const { useState, useEffect, createContext, useContext, useCallback } = React;
 
-        // Storage helpers
+        // ========== STORAGE HELPERS ==========
         const storage = {
             get: (key) => {
                 try {
@@ -503,23 +107,25 @@
         const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const generateReferralCode = (username) => `${username.slice(0, 4)}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
-        // Packages
+        // ========== DATA ==========
         const PACKAGES = [
-            { id: "small", name: "Starter", ksh: 300, coins: 30 },
-            { id: "medium", name: "Growth", ksh: 500, coins: 70 },
-            { id: "premium", name: "Premium", ksh: 1000, coins: 150, popular: true },
+            { id: "small", name: "Starter", ksh: 300, coins: 30, badge: null },
+            { id: "medium", name: "Growth", ksh: 500, coins: 70, badge: "🔥 BEST VALUE" },
+            { id: "premium", name: "Premium", ksh: 1000, coins: 150, badge: "🌟 POPULAR" },
         ];
 
-        // Mock Tasks
-        const INITIAL_TASKS = [
-            { id: "t1", title: "Follow on TikTok", description: "Follow our official TikTok account", category: "social", reward: 50, coin_cost: 5, difficulty: "Easy", is_active: true },
-            { id: "t2", title: "Write a Review", description: "Write a 100-word review about your experience", category: "writing", reward: 150, coin_cost: 15, difficulty: "Medium", is_active: true },
-            { id: "t3", title: "YouTube Watch", description: "Watch our latest video for 2 minutes", category: "social", reward: 40, coin_cost: 4, difficulty: "Easy", is_active: true },
-            { id: "t4", title: "Vocabulary Builder", description: "Learn new words and use them in sentences", category: "learning", reward: 80, coin_cost: 8, difficulty: "Medium", is_active: true },
-            { id: "t5", title: "Listening Task", description: "Listen to audio and answer questions", category: "listening", reward: 60, coin_cost: 6, difficulty: "Easy", is_active: true },
+        const TASKS = [
+            { id: "t1", title: "Follow on TikTok", description: "Follow our official TikTok account", category: "social", reward: 50, coin_cost: 5, difficulty: "Easy", icon: "📱", is_active: true },
+            { id: "t2", title: "Write a Review", description: "Write a 100-word review about your experience", category: "writing", reward: 150, coin_cost: 15, difficulty: "Medium", icon: "✍️", is_active: true },
+            { id: "t3", title: "YouTube Watch", description: "Watch our latest video for 2 minutes", category: "social", reward: 40, coin_cost: 4, difficulty: "Easy", icon: "▶️", is_active: true },
+            { id: "t4", title: "Vocabulary Builder", description: "Learn new words and use them in sentences", category: "learning", reward: 80, coin_cost: 8, difficulty: "Medium", icon: "📚", is_active: true },
+            { id: "t5", title: "Listening Task", description: "Listen to audio and answer questions", category: "listening", reward: 60, coin_cost: 6, difficulty: "Easy", icon: "🎧", is_active: true },
+            { id: "t6", title: "Share on Twitter", description: "Share our pinned post on Twitter", category: "social", reward: 45, coin_cost: 4, difficulty: "Easy", icon: "🐦", is_active: true },
+            { id: "t7", title: "Instagram Story", description: "Share our Instagram story", category: "social", reward: 55, coin_cost: 5, difficulty: "Easy", icon: "📸", is_active: true },
+            { id: "t8", title: "Blog Writing", description: "Write a 300-word blog post", category: "writing", reward: 200, coin_cost: 20, difficulty: "Hard", icon: "📝", is_active: true },
         ];
 
-        // Auth Context
+        // ========== AUTH CONTEXT ==========
         const AuthContext = createContext(null);
         
         const AuthProvider = ({ children }) => {
@@ -554,6 +160,7 @@
                     available_balance: 0,
                     pending_balance: 0,
                     coins_balance: 0,
+                    total_tasks_completed: 0,
                     total_referrals: 0,
                     is_admin: isFirst,
                     is_superadmin: isFirst,
@@ -605,7 +212,7 @@
 
         const useAuth = () => useContext(AuthContext);
 
-        // Toast Context
+        // ========== TOAST CONTEXT ==========
         const ToastContext = createContext(null);
         
         const ToastProvider = ({ children }) => {
@@ -620,13 +227,19 @@
             return (
                 <ToastContext.Provider value={addToast}>
                     {children}
-                    <div className="toast-container">
+                    <div style={{ position: "fixed", top: 20, right: 20, zIndex: 1100, display: "flex", flexDirection: "column", gap: 10 }}>
                         {toasts.map(toast => (
-                            <div key={toast.id} className={`toast toast-${toast.type}`}>
-                                <div>
-                                    <div style={{ fontWeight: 600 }}>{toast.title}</div>
-                                    {toast.message && <div style={{ fontSize: 12 }}>{toast.message}</div>}
-                                </div>
+                            <div key={toast.id} style={{
+                                background: "#0B1220",
+                                backdropFilter: "blur(10px)",
+                                borderLeft: `3px solid ${toast.type === "success" ? "#22FF88" : toast.type === "error" ? "#FF4444" : "#00D9FF"}`,
+                                borderRadius: 12,
+                                padding: "12px 16px",
+                                minWidth: 260,
+                                animation: "slideUp 0.3s ease-out",
+                            }}>
+                                <div style={{ fontWeight: 600 }}>{toast.title}</div>
+                                {toast.message && <div style={{ fontSize: 12, color: "#A0AEC0" }}>{toast.message}</div>}
                             </div>
                         ))}
                     </div>
@@ -636,12 +249,12 @@
         
         const useToast = () => useContext(ToastContext);
 
-        // Global State Context
+        // ========== GLOBAL CONTEXT ==========
         const GlobalContext = createContext(null);
         
         const GlobalProvider = ({ children }) => {
             const [user, setUser] = useState(null);
-            const [tasks] = useState(INITIAL_TASKS);
+            const [tasks] = useState(TASKS);
             const [referrals, setReferrals] = useState(() => storage.get("rh_referrals") || []);
             
             useEffect(() => {
@@ -687,15 +300,15 @@
                 addBalance(task.reward);
                 
                 storage.set(`rh_completions_${user.id}`, [...completions, task.id]);
+                updateUser({ total_tasks_completed: user.total_tasks_completed + 1 });
                 return true;
-            }, [user, deductCoins, addBalance]);
+            }, [user, deductCoins, addBalance, updateUser]);
             
             const purchasePackage = useCallback(async (pkg) => {
                 if (!user) return false;
                 addCoins(pkg.coins);
                 updateUser({ has_purchased_package: true });
                 
-                // Give referral reward if user was referred
                 if (user.referred_by) {
                     const allUsers = storage.get("rh_all_users") || [];
                     const referrer = allUsers.find(u => u.id === user.referred_by);
@@ -705,6 +318,7 @@
                             available_balance: referrer.available_balance + 50,
                             total_earned: referrer.total_earned + 50,
                             coins_balance: referrer.coins_balance + 15,
+                            total_referrals: referrer.total_referrals + 1,
                         };
                         storage.set("rh_all_users", allUsers.map(u => u.id === referrer.id ? updatedReferrer : u));
                         
@@ -715,7 +329,6 @@
                         storage.set("rh_referrals", updatedReferrals);
                     }
                 }
-                
                 return true;
             }, [user, addCoins, updateUser, referrals]);
             
@@ -731,43 +344,219 @@
         
         const useGlobal = () => useContext(GlobalContext);
 
-        // Pages
+        // ========== COMPONENTS ==========
+        
+        // Premium Glass Card Component
+        const GlassCard = ({ children, glow = false, onClick, style = {} }) => (
+            <div onClick={onClick} style={{
+                background: "#0B1220",
+                border: "1px solid rgba(34, 255, 136, 0.1)",
+                borderRadius: 24,
+                padding: 24,
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                cursor: onClick ? "pointer" : "default",
+                position: "relative",
+                overflow: "hidden",
+                ...style,
+            }} onMouseEnter={e => {
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.borderColor = "rgba(34, 255, 136, 0.3)";
+                e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.4)";
+            }} onMouseLeave={e => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = "rgba(34, 255, 136, 0.1)";
+                e.currentTarget.style.boxShadow = "none";
+            }}>
+                {glow && <div style={{
+                    position: "absolute",
+                    top: -50,
+                    right: -50,
+                    width: 150,
+                    height: 150,
+                    background: "radial-gradient(circle, rgba(34,255,136,0.15), transparent)",
+                    borderRadius: "50%",
+                    pointerEvents: "none",
+                }} />}
+                {children}
+            </div>
+        );
+        
+        // Gradient Button Component
+        const GradientButton = ({ children, onClick, variant = "primary", fullWidth = false, disabled = false, size = "md" }) => {
+            const gradients = {
+                primary: "linear-gradient(135deg, #22FF88 0%, #00D9FF 100%)",
+                secondary: "linear-gradient(135deg, #1a1f2e 0%, #0B1220 100%)",
+                danger: "linear-gradient(135deg, #FF4444 0%, #FF6B6B 100%)",
+            };
+            
+            const sizes = {
+                sm: { padding: "8px 20px", fontSize: 13 },
+                md: { padding: "12px 28px", fontSize: 14 },
+                lg: { padding: "16px 32px", fontSize: 16 },
+            };
+            
+            return (
+                <button onClick={onClick} disabled={disabled} style={{
+                    background: gradients[variant],
+                    border: variant === "secondary" ? "1px solid rgba(34,255,136,0.3)" : "none",
+                    borderRadius: 40,
+                    padding: sizes[size].padding,
+                    fontSize: sizes[size].fontSize,
+                    fontWeight: 600,
+                    color: variant === "secondary" ? "#22FF88" : "#050816",
+                    cursor: disabled ? "not-allowed" : "pointer",
+                    opacity: disabled ? 0.5 : 1,
+                    width: fullWidth ? "100%" : "auto",
+                    transition: "all 0.2s",
+                    fontFamily: "inherit",
+                }} onMouseEnter={e => {
+                    if (!disabled) {
+                        e.currentTarget.style.transform = "translateY(-2px)";
+                        e.currentTarget.style.boxShadow = "0 4px 20px rgba(34,255,136,0.4)";
+                    }
+                }} onMouseLeave={e => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "none";
+                }}>
+                    {children}
+                </button>
+            );
+        };
+        
+        // Stat Card Component
+        const StatCard = ({ label, value, icon, color, trend }) => (
+            <GlassCard style={{ padding: 20 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                    <div style={{ fontSize: 28 }}>{icon}</div>
+                    {trend && <span style={{ fontSize: 12, color: trend > 0 ? "#22FF88" : "#FF4444" }}>{trend > 0 ? `+${trend}%` : `${trend}%`}</span>}
+                </div>
+                <div style={{ fontSize: 12, color: "#A0AEC0", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</div>
+                <div style={{ fontSize: 32, fontWeight: 700, color: color, fontFamily: "monospace" }}>{value}</div>
+            </GlassCard>
+        );
+        
+        // Action Card Component
+        const ActionCard = ({ title, desc, icon, onClick }) => (
+            <GlassCard onClick={onClick} style={{ display: "flex", alignItems: "center", gap: 16, padding: 20 }}>
+                <div style={{
+                    width: 56,
+                    height: 56,
+                    background: "linear-gradient(135deg, rgba(34,255,136,0.1), rgba(0,217,255,0.05))",
+                    borderRadius: 18,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 28,
+                }}>{icon}</div>
+                <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>{title}</div>
+                    <div style={{ fontSize: 12, color: "#A0AEC0" }}>{desc}</div>
+                </div>
+                <div style={{ fontSize: 20, color: "#22FF88" }}>→</div>
+            </GlassCard>
+        );
+
+        // ========== PAGES ==========
+        
+        // Landing Page
         const LandingPage = ({ setPage }) => (
-            <div className="rewardhub-app">
-                <div className="landing-header">
-                    <span className="logo">RewardHub</span>
+            <div style={{ minHeight: "100vh", background: "#050816" }}>
+                {/* Animated Background */}
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: "radial-gradient(circle at 20% 50%, rgba(34,255,136,0.08), transparent 50%), radial-gradient(circle at 80% 80%, rgba(0,217,255,0.05), transparent 60%)",
+                    pointerEvents: "none",
+                }} />
+                
+                {/* Header */}
+                <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "20px 24px",
+                    position: "sticky",
+                    top: 0,
+                    background: "rgba(5,8,22,0.9)",
+                    backdropFilter: "blur(20px)",
+                    zIndex: 100,
+                    borderBottom: "1px solid rgba(34,255,136,0.1)",
+                }}>
+                    <div style={{ fontSize: 28, fontWeight: 800, background: "linear-gradient(135deg, #22FF88, #00D9FF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>RewardHub</div>
                     <div style={{ display: "flex", gap: 12 }}>
-                        <button className="btn btn-secondary" onClick={() => setPage("login")}>Sign In</button>
-                        <button className="btn btn-primary" onClick={() => setPage("signup")}>Get Started</button>
+                        <GradientButton variant="secondary" size="sm" onClick={() => setPage("login")}>Sign In</GradientButton>
+                        <GradientButton size="sm" onClick={() => setPage("signup")}>Get Started</GradientButton>
                     </div>
                 </div>
                 
-                <div className="hero">
-                    <h1>Earn Rewards Through<br /><span className="gradient-text">Skills & Referrals</span></h1>
-                    <p>Join our community and start earning rewards through skill-based tasks, referrals, and more.</p>
-                    <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
-                        <button className="btn btn-primary" onClick={() => setPage("signup")}>Start Earning Now →</button>
-                        <button className="btn btn-secondary" onClick={() => setPage("login")}>Sign In</button>
+                {/* Hero Section */}
+                <div style={{ textAlign: "center", padding: "80px 24px", position: "relative" }}>
+                    <div className="animate-float" style={{ fontSize: 64, marginBottom: 24 }}>💰</div>
+                    <h1 style={{ fontSize: "clamp(40px, 8vw, 64px)", fontWeight: 800, marginBottom: 20, lineHeight: 1.2 }}>
+                        Earn Rewards Through<br />
+                        <span style={{ background: "linear-gradient(135deg, #22FF88, #00D9FF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Skills & Referrals</span>
+                    </h1>
+                    <p style={{ fontSize: "clamp(14px, 2.5vw, 18px)", color: "#A0AEC0", maxWidth: 500, margin: "0 auto 40px", lineHeight: 1.5 }}>
+                        Join 10,000+ earners completing tasks and building their income stream
+                    </p>
+                    <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+                        <GradientButton size="lg" onClick={() => setPage("signup")}>Start Earning Now →</GradientButton>
+                        <GradientButton variant="secondary" size="lg" onClick={() => setPage("login")}>Sign In</GradientButton>
                     </div>
                 </div>
                 
-                <div className="features">
+                {/* Stats Banner */}
+                <div style={{
+                    display: "flex",
+                    justifyContent: "space-around",
+                    flexWrap: "wrap",
+                    gap: 32,
+                    padding: "40px 24px",
+                    maxWidth: 900,
+                    margin: "0 auto",
+                    textAlign: "center",
+                }}>
+                    {[
+                        { value: "10K+", label: "Active Users", icon: "👥" },
+                        { value: "50K+", label: "Tasks Completed", icon: "✅" },
+                        { value: "1M+", label: "Rewards Paid", icon: "💸" },
+                    ].map(stat => (
+                        <div key={stat.label} style={{ flex: 1 }}>
+                            <div style={{ fontSize: 32, fontWeight: 700, background: "linear-gradient(135deg, #22FF88, #00D9FF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{stat.value}</div>
+                            <div style={{ fontSize: 13, color: "#A0AEC0" }}>{stat.label}</div>
+                        </div>
+                    ))}
+                </div>
+                
+                {/* Features Grid */}
+                <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                    gap: 20,
+                    padding: "40px 24px 80px",
+                    maxWidth: 1000,
+                    margin: "0 auto",
+                }}>
                     {[
                         { icon: "🎯", title: "Skill-Based Tasks", desc: "Complete writing, editing, and learning tasks" },
                         { icon: "👥", title: "Referral Rewards", desc: "Earn commissions when friends join" },
-                        { icon: "💳", title: "Easy Payments", desc: "Secure deposits and withdrawals" },
+                        { icon: "💳", title: "M-PESA Integration", desc: "Secure deposits and withdrawals" },
                         { icon: "⚡", title: "Instant Earnings", desc: "Get paid immediately upon completion" },
                     ].map(f => (
-                        <div key={f.title} className="feature-card">
-                            <div className="feature-icon">{f.icon}</div>
-                            <h3>{f.title}</h3>
-                            <p>{f.desc}</p>
-                        </div>
+                        <GlassCard key={f.title} style={{ textAlign: "center", padding: 32 }}>
+                            <div style={{ fontSize: 48, marginBottom: 16 }}>{f.icon}</div>
+                            <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 8 }}>{f.title}</div>
+                            <div style={{ fontSize: 13, color: "#A0AEC0", lineHeight: 1.5 }}>{f.desc}</div>
+                        </GlassCard>
                     ))}
                 </div>
             </div>
         );
         
+        // Login Page
         const LoginPage = ({ setPage }) => {
             const { login } = useAuth();
             const toast = useToast();
@@ -791,36 +580,77 @@
             };
             
             return (
-                <div className="auth-container">
-                    <div className="auth-card">
-                        <div className="auth-logo">💰</div>
-                        <h2 className="auth-title">Welcome Back</h2>
-                        <p className="auth-sub">Sign in to your account</p>
+                <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "#050816" }}>
+                    <GlassCard style={{ maxWidth: 440, width: "100%", padding: 40 }}>
+                        <div style={{ textAlign: "center", marginBottom: 32 }}>
+                            <div style={{
+                                width: 64,
+                                height: 64,
+                                background: "linear-gradient(135deg, #22FF88, #00D9FF)",
+                                borderRadius: 20,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                margin: "0 auto 20px",
+                                fontSize: 32,
+                            }}>💰</div>
+                            <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>Welcome Back</h2>
+                            <p style={{ fontSize: 14, color: "#A0AEC0" }}>Sign in to your account</p>
+                        </div>
                         
-                        {error && <div className="alert alert-error">⚠️ {error}</div>}
+                        {error && (
+                            <div style={{
+                                background: "rgba(255,68,68,0.1)",
+                                border: "1px solid rgba(255,68,68,0.2)",
+                                borderRadius: 12,
+                                padding: 12,
+                                marginBottom: 20,
+                                fontSize: 13,
+                                color: "#FF4444",
+                            }}>⚠️ {error}</div>
+                        )}
                         
                         <form onSubmit={handleSubmit}>
-                            <div className="form-group">
-                                <label className="form-label">Email</label>
-                                <input className="form-input" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                            <div style={{ marginBottom: 20 }}>
+                                <label style={{ fontSize: 12, color: "#A0AEC0", marginBottom: 8, display: "block" }}>EMAIL</label>
+                                <input type="email" value={email} onChange={e => setEmail(e.target.value)} required style={{
+                                    width: "100%",
+                                    padding: "14px 16px",
+                                    background: "rgba(255,255,255,0.05)",
+                                    border: "1px solid rgba(34,255,136,0.2)",
+                                    borderRadius: 12,
+                                    color: "white",
+                                    fontSize: 14,
+                                    outline: "none",
+                                }} />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Password</label>
-                                <input className="form-input" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+                            <div style={{ marginBottom: 24 }}>
+                                <label style={{ fontSize: 12, color: "#A0AEC0", marginBottom: 8, display: "block" }}>PASSWORD</label>
+                                <input type="password" value={password} onChange={e => setPassword(e.target.value)} required style={{
+                                    width: "100%",
+                                    padding: "14px 16px",
+                                    background: "rgba(255,255,255,0.05)",
+                                    border: "1px solid rgba(34,255,136,0.2)",
+                                    borderRadius: 12,
+                                    color: "white",
+                                    fontSize: 14,
+                                    outline: "none",
+                                }} />
                             </div>
-                            <button className="btn btn-primary w-full" type="submit" disabled={loading}>
+                            <GradientButton fullWidth disabled={loading} onClick={handleSubmit}>
                                 {loading ? "Signing in..." : "Sign In"}
-                            </button>
+                            </GradientButton>
                         </form>
                         
-                        <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: "#6b6f7e" }}>
-                            No account? <a onClick={() => setPage("signup")} style={{ color: "#10b981", cursor: "pointer" }}>Sign up</a>
+                        <p style={{ textAlign: "center", marginTop: 24, fontSize: 13, color: "#A0AEC0" }}>
+                            No account? <a onClick={() => setPage("signup")} style={{ color: "#22FF88", cursor: "pointer", fontWeight: 600 }}>Sign up</a>
                         </p>
-                    </div>
+                    </GlassCard>
                 </div>
             );
         };
         
+        // Signup Page
         const SignupPage = ({ setPage }) => {
             const { signup } = useAuth();
             const toast = useToast();
@@ -851,133 +681,234 @@
             };
             
             return (
-                <div className="auth-container">
-                    <div className="auth-card">
-                        <div className="auth-logo">🚀</div>
-                        <h2 className="auth-title">Create Account</h2>
-                        <p className="auth-sub">Start earning rewards today</p>
+                <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "#050816" }}>
+                    <GlassCard style={{ maxWidth: 440, width: "100%", padding: 40 }}>
+                        <div style={{ textAlign: "center", marginBottom: 32 }}>
+                            <div style={{
+                                width: 64,
+                                height: 64,
+                                background: "linear-gradient(135deg, #22FF88, #00D9FF)",
+                                borderRadius: 20,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                margin: "0 auto 20px",
+                                fontSize: 32,
+                            }}>🚀</div>
+                            <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>Create Account</h2>
+                            <p style={{ fontSize: 14, color: "#A0AEC0" }}>Start earning rewards today</p>
+                        </div>
                         
-                        {error && <div className="alert alert-error">⚠️ {error}</div>}
+                        {error && (
+                            <div style={{
+                                background: "rgba(255,68,68,0.1)",
+                                border: "1px solid rgba(255,68,68,0.2)",
+                                borderRadius: 12,
+                                padding: 12,
+                                marginBottom: 20,
+                                fontSize: 13,
+                                color: "#FF4444",
+                            }}>⚠️ {error}</div>
+                        )}
                         
                         <form onSubmit={handleSubmit}>
-                            <div className="form-group">
-                                <label className="form-label">Username</label>
-                                <input className="form-input" type="text" value={form.username} onChange={e => setForm({...form, username: e.target.value})} required />
+                            <div style={{ marginBottom: 16 }}>
+                                <label style={{ fontSize: 12, color: "#A0AEC0", marginBottom: 8, display: "block" }}>USERNAME</label>
+                                <input type="text" value={form.username} onChange={e => setForm({...form, username: e.target.value})} required style={{
+                                    width: "100%",
+                                    padding: "14px 16px",
+                                    background: "rgba(255,255,255,0.05)",
+                                    border: "1px solid rgba(34,255,136,0.2)",
+                                    borderRadius: 12,
+                                    color: "white",
+                                    fontSize: 14,
+                                    outline: "none",
+                                }} />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Email</label>
-                                <input className="form-input" type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+                            <div style={{ marginBottom: 16 }}>
+                                <label style={{ fontSize: 12, color: "#A0AEC0", marginBottom: 8, display: "block" }}>EMAIL</label>
+                                <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required style={{
+                                    width: "100%",
+                                    padding: "14px 16px",
+                                    background: "rgba(255,255,255,0.05)",
+                                    border: "1px solid rgba(34,255,136,0.2)",
+                                    borderRadius: 12,
+                                    color: "white",
+                                    fontSize: 14,
+                                    outline: "none",
+                                }} />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Password</label>
-                                <input className="form-input" type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
+                            <div style={{ marginBottom: 16 }}>
+                                <label style={{ fontSize: 12, color: "#A0AEC0", marginBottom: 8, display: "block" }}>PASSWORD</label>
+                                <input type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required style={{
+                                    width: "100%",
+                                    padding: "14px 16px",
+                                    background: "rgba(255,255,255,0.05)",
+                                    border: "1px solid rgba(34,255,136,0.2)",
+                                    borderRadius: 12,
+                                    color: "white",
+                                    fontSize: 14,
+                                    outline: "none",
+                                }} />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Confirm Password</label>
-                                <input className="form-input" type="password" value={form.confirm} onChange={e => setForm({...form, confirm: e.target.value})} required />
+                            <div style={{ marginBottom: 16 }}>
+                                <label style={{ fontSize: 12, color: "#A0AEC0", marginBottom: 8, display: "block" }}>CONFIRM PASSWORD</label>
+                                <input type="password" value={form.confirm} onChange={e => setForm({...form, confirm: e.target.value})} required style={{
+                                    width: "100%",
+                                    padding: "14px 16px",
+                                    background: "rgba(255,255,255,0.05)",
+                                    border: "1px solid rgba(34,255,136,0.2)",
+                                    borderRadius: 12,
+                                    color: "white",
+                                    fontSize: 14,
+                                    outline: "none",
+                                }} />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Referral Code (Optional)</label>
-                                <input className="form-input" type="text" value={form.referral} onChange={e => setForm({...form, referral: e.target.value})} />
+                            <div style={{ marginBottom: 24 }}>
+                                <label style={{ fontSize: 12, color: "#A0AEC0", marginBottom: 8, display: "block" }}>REFERRAL CODE (OPTIONAL)</label>
+                                <input type="text" value={form.referral} onChange={e => setForm({...form, referral: e.target.value})} style={{
+                                    width: "100%",
+                                    padding: "14px 16px",
+                                    background: "rgba(255,255,255,0.05)",
+                                    border: "1px solid rgba(34,255,136,0.2)",
+                                    borderRadius: 12,
+                                    color: "white",
+                                    fontSize: 14,
+                                    outline: "none",
+                                }} />
                             </div>
-                            <button className="btn btn-primary w-full" type="submit" disabled={loading}>
+                            <GradientButton fullWidth disabled={loading} onClick={handleSubmit}>
                                 {loading ? "Creating account..." : "Create Account"}
-                            </button>
+                            </GradientButton>
                         </form>
                         
-                        <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: "#6b6f7e" }}>
-                            Already have an account? <a onClick={() => setPage("login")} style={{ color: "#10b981", cursor: "pointer" }}>Sign in</a>
+                        <p style={{ textAlign: "center", marginTop: 24, fontSize: 13, color: "#A0AEC0" }}>
+                            Already have an account? <a onClick={() => setPage("login")} style={{ color: "#22FF88", cursor: "pointer", fontWeight: 600 }}>Sign in</a>
                         </p>
-                    </div>
+                    </GlassCard>
                 </div>
             );
         };
         
+        // Dashboard Page (Premium Redesign)
         const DashboardPage = ({ setPage }) => {
             const { user, tasks, referrals } = useGlobal();
-            const toast = useToast();
+            const completions = storage.get(`rh_completions_${user?.id}`) || [];
+            const userReferrals = referrals.filter(r => r.referrer_id === user?.id);
+            const tasksCompleted = completions.length;
             
             if (!user) return null;
             
-            const userReferrals = referrals.filter(r => r.referrer_id === user.id);
-            const verifiedReferrals = userReferrals.filter(r => r.status === "verified");
-            const totalEarnedFromReferrals = verifiedReferrals.reduce((sum, r) => sum + r.reward_earned, 0);
-            
-            const copyReferralCode = () => {
-                navigator.clipboard.writeText(user.referral_code);
-                toast({ title: "Copied!", message: "Referral code copied", type: "success" });
-            };
-            
             return (
-                <div className="dashboard-container">
-                    <div className="welcome-section">
-                        <h1>Hey, {user.username} 👋</h1>
-                        <p style={{ color: "#6b6f7e" }}>{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
+                <div style={{ padding: "20px 20px 100px", maxWidth: 900, margin: "0 auto" }}>
+                    {/* Welcome Section */}
+                    <div style={{ marginBottom: 24 }}>
+                        <div style={{ fontSize: 14, color: "#A0AEC0", marginBottom: 8 }}>Good {new Date().getHours() < 12 ? "Morning" : new Date().getHours() < 18 ? "Afternoon" : "Evening"}!</div>
+                        <h1 style={{ fontSize: 28, fontWeight: 800, background: "linear-gradient(135deg, #22FF88, #00D9FF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                            {user.username} 👋
+                        </h1>
                     </div>
                     
-                    <div className="stats-grid">
-                        <div className="stat-box">
-                            <div className="stat-label">Total Earned</div>
-                            <div className="stat-value green">{user.total_earned.toLocaleString()} KSH</div>
+                    {/* Main Balance Card */}
+                    <GlassCard glow style={{ marginBottom: 24, background: "linear-gradient(135deg, #0B1220, #050816)" }}>
+                        <div style={{ textAlign: "center", marginBottom: 24 }}>
+                            <div style={{ fontSize: 13, color: "#A0AEC0", marginBottom: 8, textTransform: "uppercase", letterSpacing: "2px" }}>Total Balance</div>
+                            <div style={{ fontSize: 48, fontWeight: 800, color: "#22FF88", fontFamily: "monospace" }}>
+                                KSH {user.available_balance.toLocaleString()}
+                            </div>
+                            <div style={{ fontSize: 14, color: "#A0AEC0", marginTop: 8 }}>≈ ${(user.available_balance / 130).toFixed(2)} USD</div>
                         </div>
-                        <div className="stat-box">
-                            <div className="stat-label">Available</div>
-                            <div className="stat-value cyan">{user.available_balance.toLocaleString()} KSH</div>
-                        </div>
-                        <div className="stat-box">
-                            <div className="stat-label">Coins</div>
-                            <div className="stat-value purple">{user.coins_balance}</div>
-                        </div>
-                        <div className="stat-box">
-                            <div className="stat-label">Referrals</div>
-                            <div className="stat-value amber">{user.total_referrals}</div>
-                        </div>
-                    </div>
-                    
-                    {!user.has_purchased_package && (
-                        <div className="stat-box" style={{ marginBottom: 24, background: "linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.05))" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <div>
-                                    <div style={{ fontWeight: 600, marginBottom: 4 }}>🔓 Unlock Earning Features</div>
-                                    <div style={{ fontSize: 12, color: "#6b6f7e" }}>Purchase a package to start completing tasks</div>
-                                </div>
-                                <button className="btn btn-primary btn-sm" onClick={() => setPage("deposits")}>Buy Package →</button>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
+                            <div style={{ flex: 1, textAlign: "center", padding: "12px 0", background: "rgba(34,255,136,0.05)", borderRadius: 16 }}>
+                                <div style={{ fontSize: 24, fontWeight: 700, color: "#22FF88" }}>{user.coins_balance}</div>
+                                <div style={{ fontSize: 11, color: "#A0AEC0" }}>Coins</div>
+                            </div>
+                            <div style={{ flex: 1, textAlign: "center", padding: "12px 0", background: "rgba(0,217,255,0.05)", borderRadius: 16 }}>
+                                <div style={{ fontSize: 24, fontWeight: 700, color: "#00D9FF" }}>{user.total_earned.toLocaleString()}</div>
+                                <div style={{ fontSize: 11, color: "#A0AEC0" }}>Total Earned</div>
+                            </div>
+                            <div style={{ flex: 1, textAlign: "center", padding: "12px 0", background: "rgba(139,92,246,0.05)", borderRadius: 16 }}>
+                                <div style={{ fontSize: 24, fontWeight: 700, color: "#8B5CF6" }}>{tasksCompleted}</div>
+                                <div style={{ fontSize: 11, color: "#A0AEC0" }}>Tasks Done</div>
                             </div>
                         </div>
+                    </GlassCard>
+                    
+                    {/* Stats Row */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16, marginBottom: 24 }}>
+                        <StatCard label="Total Referrals" value={userReferrals.length} icon="👥" color="#00D9FF" />
+                        <StatCard label="Active Referrals" value={userReferrals.filter(r => r.status === "verified").length} icon="✅" color="#22FF88" />
+                    </div>
+                    
+                    {/* Unlock Banner */}
+                    {!user.has_purchased_package && (
+                        <GlassCard style={{ marginBottom: 24, background: "linear-gradient(135deg, rgba(34,255,136,0.1), rgba(0,217,255,0.05))", borderColor: "#22FF88" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+                                <div>
+                                    <div style={{ fontWeight: 700, marginBottom: 4 }}>🔓 Unlock Full Potential</div>
+                                    <div style={{ fontSize: 12, color: "#A0AEC0" }}>Purchase a package to access all tasks</div>
+                                </div>
+                                <GradientButton size="sm" onClick={() => setPage("deposits")}>Buy Package →</GradientButton>
+                            </div>
+                        </GlassCard>
                     )}
                     
-                    <div className="action-cards">
-                        {[
-                            { title: "Complete Tasks", desc: "Earn KSH by completing skill-based tasks", icon: "🎯", page: "tasks" },
-                            { title: "Buy Coins", desc: "Purchase packages to get coins", icon: "⚡", page: "deposits" },
-                            { title: "Refer Friends", desc: "Invite friends and earn rewards", icon: "👥", page: "referrals" },
-                            { title: "Withdraw Earnings", desc: "Cash out your earnings", icon: "💸", page: "wallet" },
-                        ].map(c => (
-                            <div key={c.page} className="action-card" onClick={() => setPage(c.page)}>
-                                <div className="action-icon">{c.icon}</div>
-                                <div className="action-content">
-                                    <div className="action-title">{c.title}</div>
-                                    <div className="action-desc">{c.desc}</div>
-                                </div>
-                                <span>→</span>
+                    {/* Withdrawal Progress */}
+                    {user.available_balance < 1500 && user.has_purchased_package && (
+                        <GlassCard style={{ marginBottom: 24 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+                                <div style={{ fontSize: 13, fontWeight: 600 }}>Withdrawal Progress</div>
+                                <div style={{ fontSize: 13, color: "#22FF88" }}>{user.available_balance.toLocaleString()} / 1,500 KSH</div>
                             </div>
-                        ))}
+                            <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 20, height: 8, overflow: "hidden" }}>
+                                <div style={{
+                                    width: `${Math.min(100, (user.available_balance / 1500) * 100)}%`,
+                                    height: "100%",
+                                    background: "linear-gradient(90deg, #22FF88, #00D9FF)",
+                                    borderRadius: 20,
+                                }} />
+                            </div>
+                            <div style={{ fontSize: 11, color: "#A0AEC0", marginTop: 12 }}>
+                                Need {(1500 - user.available_balance).toLocaleString()} KSH more to withdraw
+                            </div>
+                        </GlassCard>
+                    )}
+                    
+                    {/* Action Grid */}
+                    <div style={{ display: "grid", gap: 12, marginBottom: 24 }}>
+                        <ActionCard title="Complete Tasks" desc="Earn KSH by completing skill-based tasks" icon="🎯" onClick={() => setPage("tasks")} />
+                        <ActionCard title="Buy Coins" desc="Purchase packages to get coins" icon="⚡" onClick={() => setPage("deposits")} />
+                        <ActionCard title="Refer Friends" desc="Invite friends and earn rewards" icon="👥" onClick={() => setPage("referrals")} />
+                        <ActionCard title="Withdraw Earnings" desc="Cash out your earnings" icon="💸" onClick={() => setPage("wallet")} />
                     </div>
                     
-                    <div className="stat-box">
+                    {/* Referral Code Card */}
+                    <GlassCard>
                         <div style={{ fontWeight: 600, marginBottom: 12 }}>Your Referral Code</div>
-                        <div className="referral-box">
-                            <code className="referral-code">{user.referral_code}</code>
-                            <button className="btn btn-secondary btn-sm" onClick={copyReferralCode}>Copy</button>
+                        <div style={{
+                            background: "rgba(0,0,0,0.3)",
+                            padding: "14px 16px",
+                            borderRadius: 12,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: 12,
+                        }}>
+                            <code style={{ fontSize: 18, fontWeight: 700, letterSpacing: 2, color: "#22FF88" }}>{user.referral_code}</code>
+                            <GradientButton size="sm" onClick={() => {
+                                navigator.clipboard.writeText(user.referral_code);
+                                alert("Copied!");
+                            }}>Copy</GradientButton>
                         </div>
-                        <div style={{ fontSize: 12, color: "#6b6f7e" }}>
+                        <div style={{ fontSize: 12, color: "#A0AEC0" }}>
                             Share this code — earn 50 KSH + 15 coins when friends purchase a package
                         </div>
-                    </div>
+                    </GlassCard>
                 </div>
             );
         };
         
+        // Tasks Page
         const TasksPage = () => {
             const { user, tasks, completeTask } = useGlobal();
             const toast = useToast();
@@ -1004,62 +935,80 @@
             };
             
             return (
-                <div className="dashboard-container">
-                    <div className="welcome-section">
-                        <h1>Tasks</h1>
-                        <p style={{ color: "#6b6f7e" }}>Complete tasks to earn KSH rewards</p>
+                <div style={{ padding: "20px 20px 100px", maxWidth: 900, margin: "0 auto" }}>
+                    <div style={{ marginBottom: 24 }}>
+                        <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Tasks</h1>
+                        <p style={{ fontSize: 14, color: "#A0AEC0" }}>Complete tasks to earn KSH rewards</p>
                     </div>
                     
-                    <div className="stat-box" style={{ marginBottom: 20 }}>
+                    {/* Coins Card */}
+                    <GlassCard style={{ marginBottom: 20, padding: 20 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <div>
-                                <span style={{ fontSize: 24 }}>⚡</span>
-                                <span style={{ marginLeft: 8, fontWeight: 600 }}>{user.coins_balance} coins available</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                                <div style={{ fontSize: 32 }}>⚡</div>
+                                <div>
+                                    <div style={{ fontWeight: 600, fontSize: 14 }}>Your Coins</div>
+                                    <div style={{ fontSize: 24, fontWeight: 700, color: "#00D9FF" }}>{user.coins_balance}</div>
+                                </div>
                             </div>
-                            <button className="btn btn-secondary btn-sm">Buy More</button>
+                            <GradientButton size="sm" onClick={() => {}}>Buy More</GradientButton>
                         </div>
-                    </div>
+                    </GlassCard>
                     
-                    <div className="task-filters">
+                    {/* Category Filters */}
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
                         {["all", "social", "writing", "learning", "listening"].map(c => (
-                            <button key={c} className={`filter-btn ${category === c ? "active" : ""}`} onClick={() => setCategory(c)}>
+                            <button key={c} onClick={() => setCategory(c)} style={{
+                                padding: "8px 20px",
+                                borderRadius: 40,
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: "pointer",
+                                background: category === c ? "linear-gradient(135deg, #22FF88, #00D9FF)" : "rgba(255,255,255,0.05)",
+                                border: "none",
+                                color: category === c ? "#050816" : "#A0AEC0",
+                                transition: "all 0.2s",
+                            }}>
                                 {c.charAt(0).toUpperCase() + c.slice(1)}
                             </button>
                         ))}
                     </div>
                     
+                    {/* Task List */}
                     {filtered.map(task => {
                         const completed = completions.includes(task.id);
                         const canComplete = !completed && user.coins_balance >= task.coin_cost && user.has_purchased_package;
                         
                         return (
-                            <div key={task.id} className="task-card" style={{ opacity: completed ? 0.6 : 1 }}>
-                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                                    <div>
-                                        <div style={{ fontWeight: 600, marginBottom: 4 }}>{task.title}</div>
-                                        <div style={{ fontSize: 12, color: "#6b6f7e" }}>{task.category} • {task.difficulty}</div>
+                            <GlassCard key={task.id} style={{ marginBottom: 12, padding: 20, opacity: completed ? 0.6 : 1 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                                    <div style={{ display: "flex", gap: 12 }}>
+                                        <div style={{ fontSize: 32 }}>{task.icon}</div>
+                                        <div>
+                                            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>{task.title}</div>
+                                            <div style={{ fontSize: 12, color: "#A0AEC0" }}>{task.category} • {task.difficulty}</div>
+                                        </div>
                                     </div>
-                                    {completed && <span style={{ color: "#10b981" }}>✓ Done</span>}
+                                    {completed && <div style={{ color: "#22FF88", fontSize: 20 }}>✓</div>}
                                 </div>
-                                <p style={{ fontSize: 13, color: "#a1a5b5", marginBottom: 12 }}>{task.description}</p>
-                                <div style={{ display: "flex", gap: 16, marginBottom: 12 }}>
-                                    <span style={{ color: "#10b981", fontWeight: 600 }}>🏆 {task.reward} KSH</span>
-                                    <span style={{ color: "#8b5cf6", fontWeight: 600 }}>⚡ {task.coin_cost} coins</span>
+                                <p style={{ fontSize: 13, color: "#A0AEC0", marginBottom: 16 }}>{task.description}</p>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+                                    <div style={{ display: "flex", gap: 16 }}>
+                                        <span style={{ color: "#22FF88", fontWeight: 600 }}>🏆 {task.reward} KSH</span>
+                                        <span style={{ color: "#00D9FF", fontWeight: 600 }}>⚡ {task.coin_cost} coins</span>
+                                    </div>
+                                    <GradientButton size="sm" disabled={!canComplete} onClick={() => handleComplete(task)}>
+                                        {completed ? "Completed" : canComplete ? "Complete Task" : `Need ${task.coin_cost} coins`}
+                                    </GradientButton>
                                 </div>
-                                <button className="btn w-full" style={{
-                                    background: completed ? "rgba(16,185,129,0.1)" : canComplete ? "linear-gradient(135deg, #10b981, #06b6d4)" : "rgba(255,255,255,0.05)",
-                                    color: completed ? "#10b981" : canComplete ? "white" : "#6b6f7e",
-                                    cursor: canComplete ? "pointer" : "not-allowed"
-                                }} onClick={() => handleComplete(task)} disabled={!canComplete}>
-                                    {completed ? "Completed" : canComplete ? "Complete Task" : `Need ${task.coin_cost} coins`}
-                                </button>
-                            </div>
+                            </GlassCard>
                         );
                     })}
                 </div>
             );
         };
         
+        // Referrals Page
         const ReferralsPage = () => {
             const { user, referrals } = useGlobal();
             const toast = useToast();
@@ -1070,38 +1019,49 @@
             const verified = userReferrals.filter(r => r.status === "verified");
             const totalEarned = verified.reduce((sum, r) => sum + r.reward_earned, 0);
             
-            const copyCode = () => {
-                navigator.clipboard.writeText(user.referral_code);
-                toast({ title: "Copied!", type: "success" });
-            };
-            
             const shareWhatsApp = () => {
-                const text = `Join RewardHub with my code: ${user.referral_code}. Start earning today!`;
+                const text = `🚀 Join RewardHub and start earning! Use my referral code: ${user.referral_code}\n\nSign up here: ${window.location.origin}`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
             };
             
             return (
-                <div className="dashboard-container">
-                    <div className="welcome-section">
-                        <h1>Referrals</h1>
-                        <p style={{ color: "#6b6f7e" }}>Invite friends and earn rewards</p>
+                <div style={{ padding: "20px 20px 100px", maxWidth: 900, margin: "0 auto" }}>
+                    <div style={{ marginBottom: 24 }}>
+                        <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Referrals</h1>
+                        <p style={{ fontSize: 14, color: "#A0AEC0" }}>Invite friends and earn rewards</p>
                     </div>
                     
-                    <div className="stat-box" style={{ marginBottom: 20, background: "linear-gradient(135deg, rgba(139,92,246,0.1), rgba(6,182,212,0.05))" }}>
+                    {/* Referral Code Card */}
+                    <GlassCard glow style={{ marginBottom: 24 }}>
                         <div style={{ marginBottom: 16 }}>
-                            <div style={{ fontSize: 12, color: "#6b6f7e", marginBottom: 8 }}>Your Referral Code</div>
-                            <div className="referral-box">
-                                <code className="referral-code">{user.referral_code}</code>
+                            <div style={{ fontSize: 12, color: "#A0AEC0", marginBottom: 8 }}>Your Referral Code</div>
+                            <div style={{
+                                background: "rgba(0,0,0,0.3)",
+                                padding: "16px",
+                                borderRadius: 16,
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                            }}>
+                                <code style={{ fontSize: 20, fontWeight: 700, letterSpacing: 2, color: "#22FF88" }}>{user.referral_code}</code>
                                 <div style={{ display: "flex", gap: 8 }}>
-                                    <button className="btn btn-secondary btn-sm" onClick={copyCode}>Copy</button>
-                                    <button className="btn btn-secondary btn-sm" onClick={shareWhatsApp}>WhatsApp</button>
+                                    <GradientButton size="sm" onClick={() => {
+                                        navigator.clipboard.writeText(user.referral_code);
+                                        toast({ title: "Copied!", type: "success" });
+                                    }}>Copy</GradientButton>
+                                    <GradientButton variant="secondary" size="sm" onClick={shareWhatsApp}>WhatsApp</GradientButton>
                                 </div>
                             </div>
                         </div>
                         
-                        <div style={{ textAlign: "center", padding: 12, background: "rgba(0,0,0,0.2)", borderRadius: 12 }}>
-                            <div style={{ fontSize: 13, marginBottom: 8 }}>How it works:</div>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#6b6f7e" }}>
+                        <div style={{
+                            background: "rgba(34,255,136,0.05)",
+                            borderRadius: 16,
+                            padding: 16,
+                            textAlign: "center",
+                        }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>How it works:</div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: "#A0AEC0" }}>
                                 <span>1. Share code</span>
                                 <span>→</span>
                                 <span>2. Friend signs up</span>
@@ -1111,31 +1071,18 @@
                                 <span>4. You earn 50 KSH + 15 coins</span>
                             </div>
                         </div>
+                    </GlassCard>
+                    
+                    {/* Stats */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 24 }}>
+                        <StatCard label="Total Referrals" value={userReferrals.length} icon="👥" color="#8B5CF6" />
+                        <StatCard label="Verified" value={verified.length} icon="✅" color="#22FF88" />
+                        <StatCard label="Earned" value={`${totalEarned} KSH`} icon="💰" color="#00D9FF" />
                     </div>
                     
-                    <div className="stats-grid">
-                        <div className="stat-box">
-                            <div className="stat-label">Total Referrals</div>
-                            <div className="stat-value purple">{userReferrals.length}</div>
-                        </div>
-                        <div className="stat-box">
-                            <div className="stat-label">Verified</div>
-                            <div className="stat-value green">{verified.length}</div>
-                        </div>
-                        <div className="stat-box">
-                            <div className="stat-label">Earned</div>
-                            <div className="stat-value amber">{totalEarned} KSH</div>
-                        </div>
-                    </div>
-                    
-                    {userReferrals.length === 0 ? (
-                        <div className="stat-box" style={{ textAlign: "center", padding: 48 }}>
-                            <div style={{ fontSize: 48, marginBottom: 16 }}>👥</div>
-                            <div style={{ fontWeight: 600, marginBottom: 8 }}>No referrals yet</div>
-                            <div style={{ fontSize: 13, color: "#6b6f7e" }}>Share your code and start earning!</div>
-                        </div>
-                    ) : (
-                        <div className="stat-box">
+                    {/* Referral History */}
+                    {userReferrals.length > 0 && (
+                        <GlassCard>
                             <div style={{ fontWeight: 600, marginBottom: 16 }}>Referral History</div>
                             <div style={{ overflowX: "auto" }}>
                                 <table style={{ width: "100%", fontSize: 13 }}>
@@ -1151,20 +1098,21 @@
                                             <tr key={ref.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                                                 <td style={{ padding: "12px 0" }}>{ref.referee_id.slice(-8)}</td>
                                                 <td style={{ padding: "12px 0" }}>
-                                                    <span style={{ color: ref.status === "verified" ? "#10b981" : "#f59e0b" }}>{ref.status}</span>
+                                                    <span style={{ color: ref.status === "verified" ? "#22FF88" : "#F59E0B" }}>{ref.status}</span>
                                                 </td>
-                                                <td style={{ padding: "12px 0", textAlign: "right", color: "#10b981" }}>{ref.reward_earned} KSH</td>
+                                                <td style={{ padding: "12px 0", textAlign: "right", color: "#22FF88" }}>{ref.reward_earned} KSH</td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
+                        </GlassCard>
                     )}
                 </div>
             );
         };
         
+        // Wallet Page
         const WalletPage = () => {
             const { user } = useGlobal();
             const toast = useToast();
@@ -1191,61 +1139,67 @@
                     created_at: new Date().toISOString(),
                 };
                 storage.set(`rh_withdrawals_${user.id}`, [newWithdrawal, ...withdrawals]);
+                
+                const allUsers = storage.get("rh_all_users") || [];
+                const updatedUsers = allUsers.map(u => u.id === user.id ? {
+                    ...u,
+                    available_balance: u.available_balance - amt,
+                    pending_balance: u.pending_balance + amt,
+                } : u);
+                storage.set("rh_all_users", updatedUsers);
+                storage.set("rh_user", updatedUsers.find(u => u.id === user.id));
+                
                 toast({ title: "Withdrawal requested!", message: "Pending admin approval", type: "success" });
                 setAmount("");
+                setTimeout(() => window.location.reload(), 1000);
             };
             
             return (
-                <div className="dashboard-container">
-                    <div className="welcome-section">
-                        <h1>Wallet</h1>
-                        <p style={{ color: "#6b6f7e" }}>Manage your earnings and withdrawals</p>
+                <div style={{ padding: "20px 20px 100px", maxWidth: 900, margin: "0 auto" }}>
+                    <div style={{ marginBottom: 24 }}>
+                        <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Wallet</h1>
+                        <p style={{ fontSize: 14, color: "#A0AEC0" }}>Manage your earnings and withdrawals</p>
                     </div>
                     
-                    <div className="stats-grid">
-                        <div className="stat-box">
-                            <div className="stat-label">Available</div>
-                            <div className="stat-value green">{user.available_balance.toLocaleString()} KSH</div>
-                        </div>
-                        <div className="stat-box">
-                            <div className="stat-label">Pending</div>
-                            <div className="stat-value cyan">{user.pending_balance.toLocaleString()} KSH</div>
-                        </div>
-                        <div className="stat-box">
-                            <div className="stat-label">Coins</div>
-                            <div className="stat-value purple">{user.coins_balance}</div>
-                        </div>
-                        <div className="stat-box">
-                            <div className="stat-label">Total Earned</div>
-                            <div className="stat-value amber">{user.total_earned.toLocaleString()} KSH</div>
-                        </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16, marginBottom: 24 }}>
+                        <StatCard label="Available" value={`${user.available_balance.toLocaleString()} KSH`} icon="💰" color="#22FF88" />
+                        <StatCard label="Pending" value={`${user.pending_balance.toLocaleString()} KSH`} icon="⏳" color="#00D9FF" />
+                        <StatCard label="Coins" value={user.coins_balance} icon="⚡" color="#8B5CF6" />
+                        <StatCard label="Total Earned" value={`${user.total_earned.toLocaleString()} KSH`} icon="🏆" color="#F59E0B" />
                     </div>
                     
-                    {user.available_balance >= 1500 && (
-                        <div className="stat-box" style={{ marginBottom: 20 }}>
+                    {user.available_balance >= 1500 ? (
+                        <GlassCard>
                             <div style={{ fontWeight: 600, marginBottom: 16 }}>Request Withdrawal</div>
-                            <div className="form-group">
-                                <label className="form-label">Amount (KSH)</label>
-                                <input className="form-input" type="number" placeholder="1500" min="1500" value={amount} onChange={e => setAmount(e.target.value)} />
+                            <div style={{ marginBottom: 16 }}>
+                                <label style={{ fontSize: 12, color: "#A0AEC0", marginBottom: 8, display: "block" }}>AMOUNT (KSH)</label>
+                                <input type="number" placeholder="1500" min="1500" value={amount} onChange={e => setAmount(e.target.value)} style={{
+                                    width: "100%",
+                                    padding: "14px 16px",
+                                    background: "rgba(255,255,255,0.05)",
+                                    border: "1px solid rgba(34,255,136,0.2)",
+                                    borderRadius: 12,
+                                    color: "white",
+                                    fontSize: 14,
+                                    outline: "none",
+                                }} />
                             </div>
-                            <button className="btn btn-primary w-full" onClick={requestWithdrawal}>Request Withdrawal</button>
-                        </div>
-                    )}
-                    
-                    {user.available_balance < 1500 && (
-                        <div className="stat-box" style={{ marginBottom: 20, background: "rgba(245,158,11,0.1)" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                                <span style={{ fontSize: 24 }}>🔒</span>
+                            <GradientButton fullWidth onClick={requestWithdrawal}>Request Withdrawal</GradientButton>
+                        </GlassCard>
+                    ) : (
+                        <GlassCard style={{ background: "rgba(245,158,11,0.1)", borderColor: "#F59E0B" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                                <span style={{ fontSize: 32 }}>🔒</span>
                                 <div>
                                     <div style={{ fontWeight: 600, marginBottom: 4 }}>Minimum Withdrawal: 1,500 KSH</div>
-                                    <div style={{ fontSize: 12, color: "#6b6f7e" }}>Need {(1500 - user.available_balance).toLocaleString()} KSH more</div>
+                                    <div style={{ fontSize: 12, color: "#A0AEC0" }}>Need {(1500 - user.available_balance).toLocaleString()} KSH more</div>
                                 </div>
                             </div>
-                        </div>
+                        </GlassCard>
                     )}
                     
                     {withdrawals.length > 0 && (
-                        <div className="stat-box">
+                        <GlassCard style={{ marginTop: 24 }}>
                             <div style={{ fontWeight: 600, marginBottom: 16 }}>Withdrawal History</div>
                             <div style={{ overflowX: "auto" }}>
                                 <table style={{ width: "100%", fontSize: 13 }}>
@@ -1254,27 +1208,28 @@
                                             <th style={{ textAlign: "left", padding: "12px 0" }}>Amount</th>
                                             <th style={{ textAlign: "left", padding: "12px 0" }}>Status</th>
                                             <th style={{ textAlign: "right", padding: "12px 0" }}>Date</th>
-                                        </tr>
+                                        </td>
                                     </thead>
                                     <tbody>
                                         {withdrawals.map(w => (
                                             <tr key={w.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                                                 <td style={{ padding: "12px 0", fontWeight: 600 }}>{w.amount.toLocaleString()} KSH</td>
                                                 <td style={{ padding: "12px 0" }}>
-                                                    <span style={{ color: w.status === "completed" ? "#10b981" : w.status === "pending" ? "#f59e0b" : "#ef4444" }}>{w.status}</span>
+                                                    <span style={{ color: w.status === "completed" ? "#22FF88" : w.status === "pending" ? "#F59E0B" : "#FF4444" }}>{w.status}</span>
                                                 </td>
-                                                <td style={{ padding: "12px 0", textAlign: "right", color: "#6b6f7e" }}>{new Date(w.created_at).toLocaleDateString()}</td>
+                                                <td style={{ padding: "12px 0", textAlign: "right", color: "#A0AEC0" }}>{new Date(w.created_at).toLocaleDateString()}</td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
+                        </GlassCard>
                     )}
                 </div>
             );
         };
         
+        // Deposits Page
         const DepositsPage = ({ setPage }) => {
             const { user, packages, purchasePackage } = useGlobal();
             const toast = useToast();
@@ -1291,108 +1246,155 @@
             };
             
             return (
-                <div className="dashboard-container">
-                    <button className="btn btn-secondary btn-sm" style={{ marginBottom: 20 }} onClick={() => setPage("dashboard")}>← Back</button>
+                <div style={{ padding: "20px 20px 100px", maxWidth: 900, margin: "0 auto" }}>
+                    <button onClick={() => setPage("dashboard")} style={{
+                        background: "none",
+                        border: "none",
+                        color: "#A0AEC0",
+                        fontSize: 14,
+                        cursor: "pointer",
+                        marginBottom: 20,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                    }}>← Back</button>
                     
-                    <div className="welcome-section">
-                        <h1>Buy Coins</h1>
-                        <p style={{ color: "#6b6f7e" }}>Purchase packages to get coins and unlock tasks</p>
+                    <div style={{ marginBottom: 24 }}>
+                        <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Buy Coins</h1>
+                        <p style={{ fontSize: 14, color: "#A0AEC0" }}>Purchase packages to get coins and unlock tasks</p>
                     </div>
                     
-                    <div className="stat-box" style={{ marginBottom: 20 }}>
+                    <GlassCard style={{ marginBottom: 24 }}>
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
                             <div>
-                                <div style={{ fontSize: 13, color: "#6b6f7e" }}>Current Balance</div>
-                                <div style={{ fontSize: 28, fontWeight: 700, color: "#06b6d4" }}>{user.coins_balance} coins</div>
+                                <div style={{ fontSize: 13, color: "#A0AEC0" }}>Current Balance</div>
+                                <div style={{ fontSize: 32, fontWeight: 700, color: "#00D9FF" }}>{user.coins_balance} coins</div>
                             </div>
                             <div>
-                                <div style={{ fontSize: 13, color: "#6b6f7e" }}>Available KSH</div>
-                                <div style={{ fontSize: 28, fontWeight: 700, color: "#10b981" }}>{user.available_balance.toLocaleString()} KSH</div>
+                                <div style={{ fontSize: 13, color: "#A0AEC0" }}>Available KSH</div>
+                                <div style={{ fontSize: 32, fontWeight: 700, color: "#22FF88" }}>{user.available_balance.toLocaleString()} KSH</div>
                             </div>
                         </div>
-                    </div>
+                    </GlassCard>
                     
                     {packages.map(pkg => (
-                        <div key={pkg.id} className={`package-card ${pkg.popular ? "popular" : ""}`}>
-                            {pkg.popular && <div className="popular-badge">Most Popular</div>}
-                            <div className="package-name">{pkg.name}</div>
-                            <div className="package-price">{pkg.ksh.toLocaleString()} KSH</div>
-                            <div className="package-coins">⚡ {pkg.coins} coins</div>
-                            <button className="btn btn-primary w-full" onClick={() => handlePurchase(pkg)} disabled={loading}>
+                        <GlassCard key={pkg.id} style={{ marginBottom: 16, position: "relative", borderColor: pkg.popular ? "#22FF88" : "rgba(34,255,136,0.1)" }}>
+                            {pkg.badge && (
+                                <div style={{
+                                    position: "absolute",
+                                    top: 16,
+                                    right: 16,
+                                    background: "linear-gradient(135deg, #22FF88, #00D9FF)",
+                                    color: "#050816",
+                                    padding: "4px 12px",
+                                    borderRadius: 20,
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                }}>{pkg.badge}</div>
+                            )}
+                            <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>{pkg.name}</div>
+                            <div style={{ fontSize: 36, fontWeight: 800, color: "#00D9FF", marginBottom: 16 }}>{pkg.ksh.toLocaleString()} KSH</div>
+                            <div style={{
+                                background: "rgba(34,255,136,0.05)",
+                                padding: "12px",
+                                borderRadius: 12,
+                                textAlign: "center",
+                                marginBottom: 16,
+                            }}>
+                                <span style={{ fontSize: 24 }}>⚡</span>
+                                <span style={{ fontSize: 24, fontWeight: 700, marginLeft: 8 }}>{pkg.coins} coins</span>
+                            </div>
+                            <GradientButton fullWidth disabled={loading !== null} onClick={() => handlePurchase(pkg)}>
                                 {loading === pkg.id ? "Processing..." : `Pay ${pkg.ksh} KSH →`}
-                            </button>
-                        </div>
+                            </GradientButton>
+                        </GlassCard>
                     ))}
                 </div>
             );
         };
         
+        // Account Page
         const AccountPage = ({ setPage }) => {
             const { user } = useGlobal();
             const { logout } = useAuth();
-            const toast = useToast();
+            const completions = storage.get(`rh_completions_${user?.id}`) || [];
             
             if (!user) return null;
             
-            const copyCode = () => {
-                navigator.clipboard.writeText(user.referral_code);
-                toast({ title: "Copied!", type: "success" });
-            };
-            
             return (
-                <div className="dashboard-container">
-                    <div className="welcome-section" style={{ textAlign: "center" }}>
-                        <div style={{ width: 80, height: 80, background: "linear-gradient(135deg, #10b981, #06b6d4)", borderRadius: 40, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 32, fontWeight: 700 }}>{user.username[0].toUpperCase()}</div>
-                        <h1>{user.username}</h1>
-                        <p style={{ color: "#6b6f7e" }}>{user.email}</p>
-                        {user.is_admin && <span style={{ display: "inline-block", marginTop: 8, padding: "4px 12px", background: "#8b5cf6", borderRadius: 20, fontSize: 12 }}>Admin</span>}
+                <div style={{ padding: "20px 20px 100px", maxWidth: 900, margin: "0 auto" }}>
+                    <div style={{ textAlign: "center", marginBottom: 32 }}>
+                        <div style={{
+                            width: 88,
+                            height: 88,
+                            background: "linear-gradient(135deg, #22FF88, #00D9FF)",
+                            borderRadius: 44,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            margin: "0 auto 20px",
+                            fontSize: 40,
+                            fontWeight: 700,
+                        }}>{user.username[0].toUpperCase()}</div>
+                        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>{user.username}</h1>
+                        <p style={{ fontSize: 13, color: "#A0AEC0" }}>{user.email}</p>
+                        {user.is_admin && <span style={{ display: "inline-block", marginTop: 8, padding: "4px 16px", background: "rgba(139,92,246,0.2)", borderRadius: 20, fontSize: 12, color: "#8B5CF6" }}>Admin</span>}
                     </div>
                     
-                    <div className="stat-box" style={{ marginBottom: 20 }}>
+                    <GlassCard style={{ marginBottom: 20 }}>
+                        <div style={{ fontWeight: 600, marginBottom: 16 }}>Account Stats</div>
+                        <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                            <span style={{ color: "#A0AEC0" }}>Tasks Completed</span>
+                            <span style={{ fontWeight: 600, color: "#22FF88" }}>{completions.length}</span>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                            <span style={{ color: "#A0AEC0" }}>Member Since</span>
+                            <span style={{ fontWeight: 600 }}>{new Date(user.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0" }}>
+                            <span style={{ color: "#A0AEC0" }}>Account Status</span>
+                            <span style={{ fontWeight: 600, color: user.has_purchased_package ? "#22FF88" : "#F59E0B" }}>{user.has_purchased_package ? "Active" : "Package Required"}</span>
+                        </div>
+                    </GlassCard>
+                    
+                    <GlassCard style={{ marginBottom: 20 }}>
                         <div style={{ fontWeight: 600, marginBottom: 16 }}>Account Details</div>
-                        <div className="referral-box" style={{ justifyContent: "space-between", marginBottom: 12 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0" }}>
                             <div>
-                                <div style={{ fontSize: 11, color: "#6b6f7e", marginBottom: 4 }}>Referral Code</div>
-                                <code>{user.referral_code}</code>
+                                <div style={{ fontSize: 12, color: "#A0AEC0", marginBottom: 4 }}>Referral Code</div>
+                                <code style={{ fontWeight: 600 }}>{user.referral_code}</code>
                             </div>
-                            <button className="btn btn-secondary btn-sm" onClick={copyCode}>Copy</button>
+                            <GradientButton size="sm" onClick={() => {
+                                navigator.clipboard.writeText(user.referral_code);
+                            }}>Copy</GradientButton>
                         </div>
-                        <div style={{ padding: "12px 0", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-                            <div style={{ fontSize: 11, color: "#6b6f7e", marginBottom: 4 }}>Member Since</div>
-                            <div>{new Date(user.created_at).toLocaleDateString()}</div>
-                        </div>
-                    </div>
+                    </GlassCard>
                     
                     {user.is_admin && (
-                        <div className="action-card" onClick={() => setPage("admin")}>
-                            <div className="action-icon">⚙️</div>
-                            <div className="action-content">
-                                <div className="action-title">Admin Panel</div>
-                                <div className="action-desc">Manage users, tasks, and withdrawals</div>
+                        <GlassCard style={{ marginBottom: 20, cursor: "pointer" }} onClick={() => setPage("admin")}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                                <span style={{ fontSize: 28 }}>⚙️</span>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: 700 }}>Admin Panel</div>
+                                    <div style={{ fontSize: 12, color: "#A0AEC0" }}>Manage users, tasks, and withdrawals</div>
+                                </div>
+                                <span style={{ fontSize: 20, color: "#22FF88" }}>→</span>
                             </div>
-                            <span>→</span>
-                        </div>
+                        </GlassCard>
                     )}
                     
-                    <button className="btn btn-danger w-full" onClick={logout}>Sign Out</button>
+                    <GradientButton variant="danger" fullWidth onClick={logout}>Sign Out</GradientButton>
                 </div>
             );
         };
         
+        // Admin Page (Simplified)
         const AdminPage = ({ setPage }) => {
-            const { user, tasks } = useGlobal();
+            const { user } = useGlobal();
             const [allUsers, setAllUsers] = useState([]);
-            const [withdrawals, setWithdrawals] = useState([]);
             
             useEffect(() => {
                 setAllUsers(storage.get("rh_all_users") || []);
-                const allWithdrawals = [];
-                const users = storage.get("rh_all_users") || [];
-                users.forEach(u => {
-                    const w = storage.get(`rh_withdrawals_${u.id}`) || [];
-                    w.forEach(wd => allWithdrawals.push({ ...wd, username: u.username }));
-                });
-                setWithdrawals(allWithdrawals);
             }, []);
             
             if (!user?.is_admin) {
@@ -1400,31 +1402,34 @@
                 return null;
             }
             
+            const toggleBan = (userId) => {
+                const updated = allUsers.map(u => u.id === userId ? { ...u, is_banned: !u.is_banned } : u);
+                setAllUsers(updated);
+                storage.set("rh_all_users", updated);
+            };
+            
             return (
-                <div className="dashboard-container">
-                    <button className="btn btn-secondary btn-sm" style={{ marginBottom: 20 }} onClick={() => setPage("account")}>← Back</button>
+                <div style={{ padding: "20px 20px 100px", maxWidth: 900, margin: "0 auto" }}>
+                    <button onClick={() => setPage("account")} style={{
+                        background: "none",
+                        border: "none",
+                        color: "#A0AEC0",
+                        fontSize: 14,
+                        cursor: "pointer",
+                        marginBottom: 20,
+                    }}>← Back</button>
                     
-                    <div className="welcome-section">
-                        <h1>Admin Panel</h1>
-                        <p style={{ color: "#6b6f7e" }}>Platform management</p>
+                    <div style={{ marginBottom: 24 }}>
+                        <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Admin Panel</h1>
+                        <p style={{ fontSize: 14, color: "#A0AEC0" }}>Platform Management</p>
                     </div>
                     
-                    <div className="stats-grid">
-                        <div className="stat-box">
-                            <div className="stat-label">Total Users</div>
-                            <div className="stat-value">{allUsers.length}</div>
-                        </div>
-                        <div className="stat-box">
-                            <div className="stat-label">Pending Withdrawals</div>
-                            <div className="stat-value amber">{withdrawals.filter(w => w.status === "pending").length}</div>
-                        </div>
-                        <div className="stat-box">
-                            <div className="stat-label">Active Tasks</div>
-                            <div className="stat-value">{tasks.filter(t => t.is_active).length}</div>
-                        </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16, marginBottom: 24 }}>
+                        <StatCard label="Total Users" value={allUsers.length} icon="👥" color="#22FF88" />
+                        <StatCard label="Total Revenue" value={`${allUsers.reduce((sum, u) => sum + u.total_earned, 0).toLocaleString()} KSH`} icon="💰" color="#00D9FF" />
                     </div>
                     
-                    <div className="stat-box">
+                    <GlassCard>
                         <div style={{ fontWeight: 600, marginBottom: 16 }}>Users</div>
                         <div style={{ overflowX: "auto" }}>
                             <table style={{ width: "100%", fontSize: 13 }}>
@@ -1432,8 +1437,8 @@
                                     <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
                                         <th style={{ textAlign: "left", padding: "12px 0" }}>User</th>
                                         <th style={{ textAlign: "left", padding: "12px 0" }}>Balance</th>
-                                        <th style={{ textAlign: "left", padding: "12px 0" }}>Coins</th>
                                         <th style={{ textAlign: "left", padding: "12px 0" }}>Status</th>
+                                        <th style={{ textAlign: "right", padding: "12px 0" }}>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1441,19 +1446,23 @@
                                         <tr key={u.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                                             <td style={{ padding: "12px 0" }}>
                                                 <div style={{ fontWeight: 600 }}>{u.username}</div>
-                                                <div style={{ fontSize: 11, color: "#6b6f7e" }}>{u.email}</div>
+                                                <div style={{ fontSize: 11, color: "#A0AEC0" }}>{u.email}</div>
                                             </td>
                                             <td style={{ padding: "12px 0" }}>{u.available_balance} KSH</td>
-                                            <td style={{ padding: "12px 0" }}>{u.coins_balance}</td>
                                             <td style={{ padding: "12px 0" }}>
-                                                <span style={{ color: u.is_banned ? "#ef4444" : "#10b981" }}>{u.is_banned ? "Banned" : "Active"}</span>
+                                                <span style={{ color: u.is_banned ? "#FF4444" : "#22FF88" }}>{u.is_banned ? "Banned" : "Active"}</span>
+                                            </td>
+                                            <td style={{ padding: "12px 0", textAlign: "right" }}>
+                                                <GradientButton size="sm" variant={u.is_banned ? "primary" : "secondary"} onClick={() => toggleBan(u.id)}>
+                                                    {u.is_banned ? "Unban" : "Ban"}
+                                                </GradientButton>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    </GlassCard>
                 </div>
             );
         };
@@ -1472,7 +1481,13 @@
                 }
             }, [user, loading, page]);
             
-            if (loading) return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}><div className="spinner"></div></div>;
+            if (loading) {
+                return (
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "#050816" }}>
+                        <div className="skeleton" style={{ width: 40, height: 40, borderRadius: "50%" }} />
+                    </div>
+                );
+            }
             
             const renderPage = () => {
                 switch(page) {
@@ -1493,32 +1508,90 @@
             const showBottomNav = user && !["landing", "login", "signup", "admin"].includes(page);
             const navItems = [
                 { id: "dashboard", label: "Home", icon: "🏠" },
-                { id: "tasks", label: "Tasks", icon: "⚡" },
+                { id: "tasks", label: "Tasks", icon: "🎯" },
                 { id: "referrals", label: "Refer", icon: "👥" },
                 { id: "wallet", label: "Wallet", icon: "💳" },
                 { id: "account", label: "Account", icon: "👤" },
             ];
             
             return (
-                <div className="rewardhub-app">
+                <div style={{ background: "#050816", minHeight: "100vh" }}>
+                    {/* Top Navbar */}
                     {user && (
-                        <div className="landing-header">
-                            <span className="logo">RewardHub</span>
-                            <div className="balance-widget" style={{ display: "flex", gap: 16, background: "rgba(0,0,0,0.3)", padding: "8px 16px", borderRadius: 20 }}>
-                                <span>💰 {user.available_balance} KSH</span>
-                                <span>⚡ {user.coins_balance}</span>
+                        <div style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 100,
+                            background: "rgba(5,8,22,0.95)",
+                            backdropFilter: "blur(20px)",
+                            borderBottom: "1px solid rgba(34,255,136,0.1)",
+                            padding: "12px 20px",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}>
+                            <div style={{ fontSize: 22, fontWeight: 800, background: "linear-gradient(135deg, #22FF88, #00D9FF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>RewardHub</div>
+                            <div style={{ display: "flex", gap: 12 }}>
+                                <div style={{
+                                    background: "rgba(34,255,136,0.1)",
+                                    borderRadius: 40,
+                                    padding: "6px 16px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 8,
+                                }}>
+                                    <span style={{ fontSize: 14 }}>⚡</span>
+                                    <span style={{ fontWeight: 700, color: "#00D9FF" }}>{user.coins_balance}</span>
+                                </div>
+                                <div style={{
+                                    background: "rgba(0,217,255,0.1)",
+                                    borderRadius: 40,
+                                    padding: "6px 16px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 8,
+                                }}>
+                                    <span style={{ fontSize: 14 }}>💰</span>
+                                    <span style={{ fontWeight: 700, color: "#22FF88" }}>{user.available_balance.toLocaleString()} KSH</span>
+                                </div>
                             </div>
                         </div>
                     )}
                     
                     {renderPage()}
                     
+                    {/* Bottom Navigation */}
                     {showBottomNav && (
-                        <div className="bottom-nav">
+                        <div style={{
+                            position: "fixed",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            background: "rgba(11,18,32,0.95)",
+                            backdropFilter: "blur(20px)",
+                            borderTop: "1px solid rgba(34,255,136,0.1)",
+                            display: "flex",
+                            padding: "8px 16px 20px",
+                            gap: 4,
+                            zIndex: 100,
+                        }}>
                             {navItems.map(item => (
-                                <button key={item.id} className={`nav-item ${page === item.id ? "active" : ""}`} onClick={() => setPage(item.id)}>
-                                    <span className="nav-icon">{item.icon}</span>
-                                    <span className="nav-label">{item.label}</span>
+                                <button key={item.id} onClick={() => setPage(item.id)} style={{
+                                    flex: 1,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    gap: 4,
+                                    padding: "8px 4px",
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    borderRadius: 12,
+                                    transition: "all 0.2s",
+                                    color: page === item.id ? "#22FF88" : "#A0AEC0",
+                                }}>
+                                    <span style={{ fontSize: 22 }}>{item.icon}</span>
+                                    <span style={{ fontSize: 10, fontWeight: 600 }}>{item.label}</span>
                                 </button>
                             ))}
                         </div>
@@ -1527,7 +1600,7 @@
             );
         };
         
-        // Render the app
+        // Render
         const root = ReactDOM.createRoot(document.getElementById("root"));
         root.render(
             <AuthProvider>
