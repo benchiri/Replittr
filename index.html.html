@@ -5,193 +5,1539 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>RewardHub - Earn Rewards Through Skills & Referrals</title>
     <meta name="description" content="Complete skill-based tasks, refer friends, and earn real rewards with RewardHub" />
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&display=swap');
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --bg-primary: #0a0c10;
-            --bg-secondary: #0f1117;
-            --bg-tertiary: #15171f;
-            --surface: #1a1d26;
-            --surface-elevated: #22252f;
-            --surface-glass: rgba(26, 29, 38, 0.8);
-            --border: rgba(255,255,255,0.06);
-            --border-light: rgba(255,255,255,0.1);
-            --text-primary: #ffffff;
-            --text-secondary: #a1a5b5;
-            --text-tertiary: #6b6f7e;
-            --accent-green: #10b981;
-            --accent-green-glow: rgba(16, 185, 129, 0.15);
-            --accent-cyan: #06b6d4;
-            --accent-cyan-glow: rgba(6, 182, 212, 0.15);
-            --accent-purple: #8b5cf6;
-            --accent-purple-glow: rgba(139, 92, 246, 0.15);
-            --accent-amber: #f59e0b;
-            --accent-amber-glow: rgba(245, 158, 11, 0.15);
-            --accent-red: #ef4444;
-            --accent-red-glow: rgba(239, 68, 68, 0.15);
-            --gradient-primary: linear-gradient(135deg, #10b981, #06b6d4);
-            --gradient-secondary: linear-gradient(135deg, #8b5cf6, #06b6d4);
-            --gradient-gold: linear-gradient(135deg, #f59e0b, #fcd34d);
-            --font-display: 'Syne', sans-serif;
-            --font-body: 'DM Sans', sans-serif;
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-            --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
-            --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
-            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-smooth: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        html, body, #root { height: 100%; background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-body); font-size: 15px; line-height: 1.5; scroll-behavior: smooth; }
+        body {
+            background: #0a0c10;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-tertiary); }
-        ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent-green); }
+        #root {
+            min-height: 100vh;
+        }
 
-        .glass { background: var(--surface-glass); backdrop-filter: blur(12px); border: 1px solid var(--border); }
-        .glass-card { background: var(--surface-glass); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+        /* Modern CSS Reset and Base Styles */
+        .rewardhub-app {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0c10 0%, #0f1117 100%);
+            color: #ffffff;
+        }
 
-        .app { display: flex; flex-direction: column; min-height: 100vh; background: radial-gradient(ellipse at top, var(--bg-secondary), var(--bg-primary)); }
-        .page { flex: 1; padding: 20px 20px 100px; max-width: 900px; margin: 0 auto; width: 100%; }
+        /* Landing Page Styles */
+        .landing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(10,12,16,0.9);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-        .topbar { position: sticky; top: 0; z-index: 100; background: var(--surface-glass); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
-        .topbar-brand { font-family: var(--font-display); font-weight: 800; font-size: 22px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em; }
-        
-        .balance-widget { background: var(--surface); border-radius: var(--radius-lg); padding: 6px 14px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); transition: all var(--transition-base); cursor: pointer; position: relative; }
-        .balance-widget:hover { border-color: var(--accent-green); background: var(--surface-elevated); transform: translateY(-1px); }
-        .balance-item { display: flex; align-items: baseline; gap: 4px; }
-        .balance-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); }
-        .balance-value { font-weight: 700; font-size: 15px; transition: all var(--transition-smooth); }
-        .balance-value.green { color: var(--accent-green); }
-        .balance-value.cyan { color: var(--accent-cyan); }
-        .balance-change { position: absolute; animation: slideUpFade 1s ease-out forwards; pointer-events: none; font-size: 12px; font-weight: 600; white-space: nowrap; }
-        @keyframes slideUpFade { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-20px); } }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #10b981, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: var(--surface-glass); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; padding: 8px 12px env(safe-area-inset-bottom, 12px); gap: 4px; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 4px; cursor: pointer; color: var(--text-tertiary); transition: all var(--transition-fast); border: none; background: none; font-family: var(--font-body); border-radius: var(--radius-md); }
-        .nav-item.active { color: var(--accent-green); background: var(--accent-green-glow); }
-        .nav-item svg { width: 22px; height: 22px; transition: transform var(--transition-fast); }
-        .nav-item:active svg { transform: scale(0.95); }
-        .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+        .btn {
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
 
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; transition: all var(--transition-base); }
-        .card:hover { border-color: var(--border-light); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #06b6d4);
+            color: white;
+        }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
-        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; position: relative; overflow: hidden; transition: all var(--transition-base); cursor: pointer; }
-        .stat-card:hover { transform: translateY(-2px); border-color: var(--border-light); }
-        .stat-card::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity var(--transition-base); pointer-events: none; }
-        .stat-card:hover::before { opacity: 1; }
-        .stat-card.green::before { background: radial-gradient(circle at top right, var(--accent-green-glow), transparent 70%); }
-        .stat-card.cyan::before { background: radial-gradient(circle at top right, var(--accent-cyan-glow), transparent 70%); }
-        .stat-card.purple::before { background: radial-gradient(circle at top right, var(--accent-purple-glow), transparent 70%); }
-        .stat-card.amber::before { background: radial-gradient(circle at top right, var(--accent-amber-glow), transparent 70%); }
-        .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); margin-bottom: 8px; }
-        .stat-value { font-family: var(--font-display); font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
-        .stat-value.green { color: var(--accent-green); }
-        .stat-value.cyan { color: var(--accent-cyan); }
-        .stat-value.purple { color: var(--accent-purple); }
-        .stat-value.amber { color: var(--accent-amber); }
-        .stat-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(16,185,129,0.3);
+        }
 
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: var(--radius-md); font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all var(--transition-fast); letter-spacing: 0.01em; position: relative; overflow: hidden; }
-        .btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent); opacity: 0; transition: opacity var(--transition-fast); }
-        .btn:hover::before { opacity: 1; }
-        .btn:active { transform: scale(0.98); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-primary { background: var(--gradient-primary); color: #ffffff; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
-        .btn-primary:hover:not(:disabled) { box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5); transform: translateY(-1px); }
-        .btn-secondary { background: var(--surface-elevated); color: var(--text-primary); border: 1px solid var(--border-light); }
-        .btn-secondary:hover:not(:disabled) { border-color: var(--accent-cyan); color: var(--accent-cyan); }
-        .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
-        .btn-ghost:hover:not(:disabled) { border-color: var(--accent-green); color: var(--accent-green); background: var(--accent-green-glow); }
-        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.2); }
-        .btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.2); border-color: var(--accent-red); }
-        .btn-full { width: 100%; }
-        .btn-sm { padding: 8px 16px; font-size: 13px; }
-        .btn-lg { padding: 14px 24px; font-size: 16px; }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
 
-        .input-group { margin-bottom: 20px; }
-        .input-label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); margin-bottom: 8px; }
-        .input { width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 16px; color: var(--text-primary); font-family: var(--font-body); font-size: 14px; transition: all var(--transition-fast); outline: none; }
-        .input:focus { border-color: var(--accent-green); box-shadow: 0 0 0 3px var(--accent-green-glow); }
-        .input::placeholder { color: var(--text-tertiary); }
-        .select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b6f7e' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 44px; cursor: pointer; }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn var(--transition-base); }
-        .modal { background: var(--surface-elevated); border: 1px solid var(--border-light); border-radius: var(--radius-xl); max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; animation: slideUp var(--transition-smooth); }
-        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-        .modal-body { padding: 24px; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
-        .task-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 12px; transition: all var(--transition-base); cursor: pointer; }
-        .task-card:hover { transform: translateX(4px); border-color: var(--border-light); }
-        .task-card.completed { opacity: 0.6; filter: grayscale(0.2); }
-        .task-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
-        .task-badge.social { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
-        .task-badge.writing { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
-        .task-badge.editing { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
-        .task-badge.listening { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-        .task-badge.learning { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
 
-        .progress-bar { height: 100%; border-radius: 100px; background: var(--gradient-primary); transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: hidden; }
-        .progress-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation: shimmer 2s infinite; }
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .gradient-text {
+            background: linear-gradient(135deg, #10b981, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1100; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast { background: var(--surface-elevated); border-radius: var(--radius-md); padding: 14px 18px; pointer-events: auto; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-lg); animation: slideInRight var(--transition-smooth); border-left: 3px solid; max-width: 360px; }
-        .toast-success { border-left-color: var(--accent-green); background: linear-gradient(135deg, var(--surface-elevated), rgba(16, 185, 129, 0.1)); }
-        .toast-error { border-left-color: var(--accent-red); background: linear-gradient(135deg, var(--surface-elevated), rgba(239, 68, 68, 0.1)); }
-        .toast-info { border-left-color: var(--accent-cyan); background: linear-gradient(135deg, var(--surface-elevated), rgba(6, 182, 212, 0.1)); }
-        @keyframes slideInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        .hero p {
+            font-size: 18px;
+            color: #a1a5b5;
+            margin-bottom: 40px;
+        }
 
-        .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent-green); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 40px auto; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            padding: 60px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-        .flex { display: flex; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .justify-center { justify-content: center; }
-        .gap-8 { gap: 8px; }
-        .gap-12 { gap: 12px; }
-        .gap-16 { gap: 16px; }
-        .mb-4 { margin-bottom: 4px; }
-        .mb-8 { margin-bottom: 8px; }
-        .mb-12 { margin-bottom: 12px; }
-        .mb-16 { margin-bottom: 16px; }
-        .mb-20 { margin-bottom: 20px; }
-        .mb-24 { margin-bottom: 24px; }
-        .mt-8 { margin-top: 8px; }
-        .mt-12 { margin-top: 12px; }
-        .mt-16 { margin-top: 16px; }
-        .mt-24 { margin-top: 24px; }
-        .text-center { text-align: center; }
-        .text-sm { font-size: 13px; }
-        .text-xs { font-size: 11px; }
-        .text-muted { color: var(--text-tertiary); }
-        .font-bold { font-weight: 700; }
-        .text-green { color: var(--accent-green); }
-        .text-cyan { color: var(--accent-cyan); }
-        .text-purple { color: var(--accent-purple); }
-        .text-amber { color: var(--accent-amber); }
-        .text-red { color: var(--accent-red); }
-        .w-full { width: 100%; }
+        .feature-card {
+            background: rgba(26,29,38,0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(16,185,129,0.3);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: #a1a5b5;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 20px 100px;
+        }
+
+        .welcome-section {
+            margin-bottom: 32px;
+        }
+
+        .welcome-section h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-box {
+            background: rgba(26,29,38,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-2px);
+            border-color: rgba(16,185,129,0.3);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #6b6f7e;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .stat-value.green { color: #10b981; }
+        .stat-value.cyan { color: #06b6d4; }
+        .stat-value.purple { color: #8b5cf6; }
+        .stat-value.amber { color: #f59e0b; }
+
+        .action-cards {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .action-card {
+            background: rgba(26,29,38,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-card:hover {
+            transform: translateX(5px);
+            border-color: #10b981;
+        }
+
+        .action-icon {
+            font-size: 32px;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+        }
+
+        .action-content {
+            flex: 1;
+        }
+
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .action-desc {
+            font-size: 12px;
+            color: #6b6f7e;
+        }
+
+        /* Auth Pages */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: rgba(26,29,38,0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 420px;
+            width: 100%;
+        }
+
+        .auth-logo {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #10b981, #06b6d4);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+        }
+
+        .auth-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .auth-sub {
+            text-align: center;
+            color: #6b6f7e;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #6b6f7e;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26,29,38,0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            padding: 8px 16px 20px;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            background: none;
+            border: none;
+            color: #6b6f7e;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            color: #10b981;
+            background: rgba(16,185,129,0.1);
+        }
+
+        .nav-icon {
+            font-size: 22px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .alert-error {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.2);
+            color: #ef4444;
+        }
+
+        /* Package Cards */
+        .package-card {
+            background: rgba(26,29,38,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 16px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .package-card.popular {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 20px rgba(139,92,246,0.2);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #8b5cf6;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .package-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .package-price {
+            font-size: 32px;
+            font-weight: 800;
+            color: #06b6d4;
+            margin-bottom: 16px;
+        }
+
+        .package-coins {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        /* Task Filters */
+        .task-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            color: #a1a5b5;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        /* Referral Code Box */
+        .referral-box {
+            background: rgba(0,0,0,0.3);
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .referral-code {
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 36px; }
+            .landing-header { padding: 16px 20px; }
+            .features { padding: 40px 20px; }
+            .auth-card { padding: 32px 24px; }
+            .stat-value { font-size: 24px; }
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
-    <script>
-        // The entire React application code continues here...
-        // (I'll continue in the next message due to character limit)
+
+    <script type="text/babel">
+        const { useState, useEffect, createContext, useContext, useCallback } = React;
+
+        // Storage helpers
+        const storage = {
+            get: (key) => {
+                try {
+                    const item = localStorage.getItem(key);
+                    return item ? JSON.parse(item) : null;
+                } catch { return null; }
+            },
+            set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
+            remove: (key) => localStorage.removeItem(key),
+        };
+
+        const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const generateReferralCode = (username) => `${username.slice(0, 4)}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
+        // Packages
+        const PACKAGES = [
+            { id: "small", name: "Starter", ksh: 300, coins: 30 },
+            { id: "medium", name: "Growth", ksh: 500, coins: 70 },
+            { id: "premium", name: "Premium", ksh: 1000, coins: 150, popular: true },
+        ];
+
+        // Mock Tasks
+        const INITIAL_TASKS = [
+            { id: "t1", title: "Follow on TikTok", description: "Follow our official TikTok account", category: "social", reward: 50, coin_cost: 5, difficulty: "Easy", is_active: true },
+            { id: "t2", title: "Write a Review", description: "Write a 100-word review about your experience", category: "writing", reward: 150, coin_cost: 15, difficulty: "Medium", is_active: true },
+            { id: "t3", title: "YouTube Watch", description: "Watch our latest video for 2 minutes", category: "social", reward: 40, coin_cost: 4, difficulty: "Easy", is_active: true },
+            { id: "t4", title: "Vocabulary Builder", description: "Learn new words and use them in sentences", category: "learning", reward: 80, coin_cost: 8, difficulty: "Medium", is_active: true },
+            { id: "t5", title: "Listening Task", description: "Listen to audio and answer questions", category: "listening", reward: 60, coin_cost: 6, difficulty: "Easy", is_active: true },
+        ];
+
+        // Auth Context
+        const AuthContext = createContext(null);
+        
+        const AuthProvider = ({ children }) => {
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                const stored = storage.get("rh_user");
+                setUser(stored);
+                setLoading(false);
+            }, []);
+
+            const signup = async (email, password, username, referralCode) => {
+                const allUsers = storage.get("rh_all_users") || [];
+                if (allUsers.find(u => u.email === email)) throw new Error("Email already registered");
+                if (allUsers.find(u => u.username === username)) throw new Error("Username taken");
+                
+                let referrerId = null;
+                if (referralCode) {
+                    const referrer = allUsers.find(u => u.referral_code === referralCode);
+                    if (!referrer) throw new Error("Invalid referral code");
+                    referrerId = referrer.id;
+                }
+                
+                const isFirst = allUsers.length === 0;
+                const newUser = {
+                    id: generateId(),
+                    email, username, password,
+                    referral_code: generateReferralCode(username),
+                    referred_by: referrerId,
+                    total_earned: 0,
+                    available_balance: 0,
+                    pending_balance: 0,
+                    coins_balance: 0,
+                    total_referrals: 0,
+                    is_admin: isFirst,
+                    is_superadmin: isFirst,
+                    has_purchased_package: false,
+                    is_banned: false,
+                    created_at: new Date().toISOString(),
+                };
+                
+                storage.set("rh_all_users", [...allUsers, newUser]);
+                
+                if (referrerId) {
+                    const newReferral = {
+                        id: generateId(),
+                        referrer_id: referrerId,
+                        referee_id: newUser.id,
+                        status: "pending",
+                        reward_earned: 0,
+                        coins_earned: 0,
+                        created_at: new Date().toISOString(),
+                    };
+                    const referrals = storage.get("rh_referrals") || [];
+                    storage.set("rh_referrals", [...referrals, newReferral]);
+                }
+                
+                storage.set("rh_user", newUser);
+                setUser(newUser);
+            };
+            
+            const login = async (email, password) => {
+                const allUsers = storage.get("rh_all_users") || [];
+                const found = allUsers.find(u => u.email === email && u.password === password);
+                if (!found) throw new Error("Invalid email or password");
+                if (found.is_banned) throw new Error("Account is banned");
+                storage.set("rh_user", found);
+                setUser(found);
+            };
+            
+            const logout = () => {
+                storage.remove("rh_user");
+                setUser(null);
+            };
+            
+            return (
+                <AuthContext.Provider value={{ user, loading, signup, login, logout }}>
+                    {children}
+                </AuthContext.Provider>
+            );
+        };
+
+        const useAuth = () => useContext(AuthContext);
+
+        // Toast Context
+        const ToastContext = createContext(null);
+        
+        const ToastProvider = ({ children }) => {
+            const [toasts, setToasts] = useState([]);
+            
+            const addToast = useCallback((toast) => {
+                const id = generateId();
+                setToasts(prev => [...prev, { ...toast, id }]);
+                setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+            }, []);
+            
+            return (
+                <ToastContext.Provider value={addToast}>
+                    {children}
+                    <div className="toast-container">
+                        {toasts.map(toast => (
+                            <div key={toast.id} className={`toast toast-${toast.type}`}>
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>{toast.title}</div>
+                                    {toast.message && <div style={{ fontSize: 12 }}>{toast.message}</div>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </ToastContext.Provider>
+            );
+        };
+        
+        const useToast = () => useContext(ToastContext);
+
+        // Global State Context
+        const GlobalContext = createContext(null);
+        
+        const GlobalProvider = ({ children }) => {
+            const [user, setUser] = useState(null);
+            const [tasks] = useState(INITIAL_TASKS);
+            const [referrals, setReferrals] = useState(() => storage.get("rh_referrals") || []);
+            
+            useEffect(() => {
+                const stored = storage.get("rh_user");
+                setUser(stored);
+            }, []);
+            
+            const updateUser = useCallback((updates) => {
+                if (!user) return;
+                const updated = { ...user, ...updates };
+                setUser(updated);
+                storage.set("rh_user", updated);
+                const allUsers = storage.get("rh_all_users") || [];
+                storage.set("rh_all_users", allUsers.map(u => u.id === updated.id ? updated : u));
+            }, [user]);
+            
+            const addCoins = useCallback((amount) => {
+                if (!user) return;
+                updateUser({ coins_balance: user.coins_balance + amount });
+            }, [user, updateUser]);
+            
+            const addBalance = useCallback((amount) => {
+                if (!user) return;
+                updateUser({ 
+                    available_balance: user.available_balance + amount,
+                    total_earned: user.total_earned + amount
+                });
+            }, [user, updateUser]);
+            
+            const deductCoins = useCallback((amount) => {
+                if (!user || user.coins_balance < amount) return false;
+                updateUser({ coins_balance: user.coins_balance - amount });
+                return true;
+            }, [user, updateUser]);
+            
+            const completeTask = useCallback(async (task) => {
+                if (!user) return false;
+                
+                const completions = storage.get(`rh_completions_${user.id}`) || [];
+                if (completions.includes(task.id)) return false;
+                
+                if (!deductCoins(task.coin_cost)) return false;
+                addBalance(task.reward);
+                
+                storage.set(`rh_completions_${user.id}`, [...completions, task.id]);
+                return true;
+            }, [user, deductCoins, addBalance]);
+            
+            const purchasePackage = useCallback(async (pkg) => {
+                if (!user) return false;
+                addCoins(pkg.coins);
+                updateUser({ has_purchased_package: true });
+                
+                // Give referral reward if user was referred
+                if (user.referred_by) {
+                    const allUsers = storage.get("rh_all_users") || [];
+                    const referrer = allUsers.find(u => u.id === user.referred_by);
+                    if (referrer) {
+                        const updatedReferrer = {
+                            ...referrer,
+                            available_balance: referrer.available_balance + 50,
+                            total_earned: referrer.total_earned + 50,
+                            coins_balance: referrer.coins_balance + 15,
+                        };
+                        storage.set("rh_all_users", allUsers.map(u => u.id === referrer.id ? updatedReferrer : u));
+                        
+                        const updatedReferrals = referrals.map(r => 
+                            r.referee_id === user.id ? { ...r, status: "verified", reward_earned: 50, coins_earned: 15 } : r
+                        );
+                        setReferrals(updatedReferrals);
+                        storage.set("rh_referrals", updatedReferrals);
+                    }
+                }
+                
+                return true;
+            }, [user, addCoins, updateUser, referrals]);
+            
+            return (
+                <GlobalContext.Provider value={{
+                    user, tasks, packages: PACKAGES, referrals,
+                    updateUser, addCoins, addBalance, deductCoins, completeTask, purchasePackage
+                }}>
+                    {children}
+                </GlobalContext.Provider>
+            );
+        };
+        
+        const useGlobal = () => useContext(GlobalContext);
+
+        // Pages
+        const LandingPage = ({ setPage }) => (
+            <div className="rewardhub-app">
+                <div className="landing-header">
+                    <span className="logo">RewardHub</span>
+                    <div style={{ display: "flex", gap: 12 }}>
+                        <button className="btn btn-secondary" onClick={() => setPage("login")}>Sign In</button>
+                        <button className="btn btn-primary" onClick={() => setPage("signup")}>Get Started</button>
+                    </div>
+                </div>
+                
+                <div className="hero">
+                    <h1>Earn Rewards Through<br /><span className="gradient-text">Skills & Referrals</span></h1>
+                    <p>Join our community and start earning rewards through skill-based tasks, referrals, and more.</p>
+                    <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
+                        <button className="btn btn-primary" onClick={() => setPage("signup")}>Start Earning Now →</button>
+                        <button className="btn btn-secondary" onClick={() => setPage("login")}>Sign In</button>
+                    </div>
+                </div>
+                
+                <div className="features">
+                    {[
+                        { icon: "🎯", title: "Skill-Based Tasks", desc: "Complete writing, editing, and learning tasks" },
+                        { icon: "👥", title: "Referral Rewards", desc: "Earn commissions when friends join" },
+                        { icon: "💳", title: "Easy Payments", desc: "Secure deposits and withdrawals" },
+                        { icon: "⚡", title: "Instant Earnings", desc: "Get paid immediately upon completion" },
+                    ].map(f => (
+                        <div key={f.title} className="feature-card">
+                            <div className="feature-icon">{f.icon}</div>
+                            <h3>{f.title}</h3>
+                            <p>{f.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+        
+        const LoginPage = ({ setPage }) => {
+            const { login } = useAuth();
+            const toast = useToast();
+            const [email, setEmail] = useState("");
+            const [password, setPassword] = useState("");
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState("");
+            
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setError("");
+                setLoading(true);
+                try {
+                    await login(email, password);
+                    toast({ title: "Welcome back!", type: "success" });
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            
+            return (
+                <div className="auth-container">
+                    <div className="auth-card">
+                        <div className="auth-logo">💰</div>
+                        <h2 className="auth-title">Welcome Back</h2>
+                        <p className="auth-sub">Sign in to your account</p>
+                        
+                        {error && <div className="alert alert-error">⚠️ {error}</div>}
+                        
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label className="form-label">Email</label>
+                                <input className="form-input" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Password</label>
+                                <input className="form-input" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+                            </div>
+                            <button className="btn btn-primary w-full" type="submit" disabled={loading}>
+                                {loading ? "Signing in..." : "Sign In"}
+                            </button>
+                        </form>
+                        
+                        <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: "#6b6f7e" }}>
+                            No account? <a onClick={() => setPage("signup")} style={{ color: "#10b981", cursor: "pointer" }}>Sign up</a>
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+        
+        const SignupPage = ({ setPage }) => {
+            const { signup } = useAuth();
+            const toast = useToast();
+            const [form, setForm] = useState({ username: "", email: "", password: "", confirm: "", referral: "" });
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState("");
+            
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setError("");
+                if (form.password !== form.confirm) {
+                    setError("Passwords do not match");
+                    return;
+                }
+                if (form.password.length < 8) {
+                    setError("Password must be at least 8 characters");
+                    return;
+                }
+                setLoading(true);
+                try {
+                    await signup(form.email, form.password, form.username, form.referral);
+                    toast({ title: "Account created!", message: "Welcome to RewardHub!", type: "success" });
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            
+            return (
+                <div className="auth-container">
+                    <div className="auth-card">
+                        <div className="auth-logo">🚀</div>
+                        <h2 className="auth-title">Create Account</h2>
+                        <p className="auth-sub">Start earning rewards today</p>
+                        
+                        {error && <div className="alert alert-error">⚠️ {error}</div>}
+                        
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label className="form-label">Username</label>
+                                <input className="form-input" type="text" value={form.username} onChange={e => setForm({...form, username: e.target.value})} required />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Email</label>
+                                <input className="form-input" type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Password</label>
+                                <input className="form-input" type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Confirm Password</label>
+                                <input className="form-input" type="password" value={form.confirm} onChange={e => setForm({...form, confirm: e.target.value})} required />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Referral Code (Optional)</label>
+                                <input className="form-input" type="text" value={form.referral} onChange={e => setForm({...form, referral: e.target.value})} />
+                            </div>
+                            <button className="btn btn-primary w-full" type="submit" disabled={loading}>
+                                {loading ? "Creating account..." : "Create Account"}
+                            </button>
+                        </form>
+                        
+                        <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: "#6b6f7e" }}>
+                            Already have an account? <a onClick={() => setPage("login")} style={{ color: "#10b981", cursor: "pointer" }}>Sign in</a>
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+        
+        const DashboardPage = ({ setPage }) => {
+            const { user, tasks, referrals } = useGlobal();
+            const toast = useToast();
+            
+            if (!user) return null;
+            
+            const userReferrals = referrals.filter(r => r.referrer_id === user.id);
+            const verifiedReferrals = userReferrals.filter(r => r.status === "verified");
+            const totalEarnedFromReferrals = verifiedReferrals.reduce((sum, r) => sum + r.reward_earned, 0);
+            
+            const copyReferralCode = () => {
+                navigator.clipboard.writeText(user.referral_code);
+                toast({ title: "Copied!", message: "Referral code copied", type: "success" });
+            };
+            
+            return (
+                <div className="dashboard-container">
+                    <div className="welcome-section">
+                        <h1>Hey, {user.username} 👋</h1>
+                        <p style={{ color: "#6b6f7e" }}>{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
+                    </div>
+                    
+                    <div className="stats-grid">
+                        <div className="stat-box">
+                            <div className="stat-label">Total Earned</div>
+                            <div className="stat-value green">{user.total_earned.toLocaleString()} KSH</div>
+                        </div>
+                        <div className="stat-box">
+                            <div className="stat-label">Available</div>
+                            <div className="stat-value cyan">{user.available_balance.toLocaleString()} KSH</div>
+                        </div>
+                        <div className="stat-box">
+                            <div className="stat-label">Coins</div>
+                            <div className="stat-value purple">{user.coins_balance}</div>
+                        </div>
+                        <div className="stat-box">
+                            <div className="stat-label">Referrals</div>
+                            <div className="stat-value amber">{user.total_referrals}</div>
+                        </div>
+                    </div>
+                    
+                    {!user.has_purchased_package && (
+                        <div className="stat-box" style={{ marginBottom: 24, background: "linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.05))" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <div>
+                                    <div style={{ fontWeight: 600, marginBottom: 4 }}>🔓 Unlock Earning Features</div>
+                                    <div style={{ fontSize: 12, color: "#6b6f7e" }}>Purchase a package to start completing tasks</div>
+                                </div>
+                                <button className="btn btn-primary btn-sm" onClick={() => setPage("deposits")}>Buy Package →</button>
+                            </div>
+                        </div>
+                    )}
+                    
+                    <div className="action-cards">
+                        {[
+                            { title: "Complete Tasks", desc: "Earn KSH by completing skill-based tasks", icon: "🎯", page: "tasks" },
+                            { title: "Buy Coins", desc: "Purchase packages to get coins", icon: "⚡", page: "deposits" },
+                            { title: "Refer Friends", desc: "Invite friends and earn rewards", icon: "👥", page: "referrals" },
+                            { title: "Withdraw Earnings", desc: "Cash out your earnings", icon: "💸", page: "wallet" },
+                        ].map(c => (
+                            <div key={c.page} className="action-card" onClick={() => setPage(c.page)}>
+                                <div className="action-icon">{c.icon}</div>
+                                <div className="action-content">
+                                    <div className="action-title">{c.title}</div>
+                                    <div className="action-desc">{c.desc}</div>
+                                </div>
+                                <span>→</span>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    <div className="stat-box">
+                        <div style={{ fontWeight: 600, marginBottom: 12 }}>Your Referral Code</div>
+                        <div className="referral-box">
+                            <code className="referral-code">{user.referral_code}</code>
+                            <button className="btn btn-secondary btn-sm" onClick={copyReferralCode}>Copy</button>
+                        </div>
+                        <div style={{ fontSize: 12, color: "#6b6f7e" }}>
+                            Share this code — earn 50 KSH + 15 coins when friends purchase a package
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const TasksPage = () => {
+            const { user, tasks, completeTask } = useGlobal();
+            const toast = useToast();
+            const [category, setCategory] = useState("all");
+            const completions = storage.get(`rh_completions_${user?.id}`) || [];
+            
+            if (!user) return null;
+            
+            const filtered = category === "all" ? tasks : tasks.filter(t => t.category === category);
+            
+            const handleComplete = async (task) => {
+                if (completions.includes(task.id)) {
+                    toast({ title: "Already completed", type: "error" });
+                    return;
+                }
+                if (user.coins_balance < task.coin_cost) {
+                    toast({ title: "Insufficient coins", message: `Need ${task.coin_cost} coins`, type: "error" });
+                    return;
+                }
+                const success = await completeTask(task);
+                if (success) {
+                    toast({ title: "Task completed! 🎉", message: `+${task.reward} KSH added`, type: "success" });
+                }
+            };
+            
+            return (
+                <div className="dashboard-container">
+                    <div className="welcome-section">
+                        <h1>Tasks</h1>
+                        <p style={{ color: "#6b6f7e" }}>Complete tasks to earn KSH rewards</p>
+                    </div>
+                    
+                    <div className="stat-box" style={{ marginBottom: 20 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <div>
+                                <span style={{ fontSize: 24 }}>⚡</span>
+                                <span style={{ marginLeft: 8, fontWeight: 600 }}>{user.coins_balance} coins available</span>
+                            </div>
+                            <button className="btn btn-secondary btn-sm">Buy More</button>
+                        </div>
+                    </div>
+                    
+                    <div className="task-filters">
+                        {["all", "social", "writing", "learning", "listening"].map(c => (
+                            <button key={c} className={`filter-btn ${category === c ? "active" : ""}`} onClick={() => setCategory(c)}>
+                                {c.charAt(0).toUpperCase() + c.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                    
+                    {filtered.map(task => {
+                        const completed = completions.includes(task.id);
+                        const canComplete = !completed && user.coins_balance >= task.coin_cost && user.has_purchased_package;
+                        
+                        return (
+                            <div key={task.id} className="task-card" style={{ opacity: completed ? 0.6 : 1 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                                    <div>
+                                        <div style={{ fontWeight: 600, marginBottom: 4 }}>{task.title}</div>
+                                        <div style={{ fontSize: 12, color: "#6b6f7e" }}>{task.category} • {task.difficulty}</div>
+                                    </div>
+                                    {completed && <span style={{ color: "#10b981" }}>✓ Done</span>}
+                                </div>
+                                <p style={{ fontSize: 13, color: "#a1a5b5", marginBottom: 12 }}>{task.description}</p>
+                                <div style={{ display: "flex", gap: 16, marginBottom: 12 }}>
+                                    <span style={{ color: "#10b981", fontWeight: 600 }}>🏆 {task.reward} KSH</span>
+                                    <span style={{ color: "#8b5cf6", fontWeight: 600 }}>⚡ {task.coin_cost} coins</span>
+                                </div>
+                                <button className="btn w-full" style={{
+                                    background: completed ? "rgba(16,185,129,0.1)" : canComplete ? "linear-gradient(135deg, #10b981, #06b6d4)" : "rgba(255,255,255,0.05)",
+                                    color: completed ? "#10b981" : canComplete ? "white" : "#6b6f7e",
+                                    cursor: canComplete ? "pointer" : "not-allowed"
+                                }} onClick={() => handleComplete(task)} disabled={!canComplete}>
+                                    {completed ? "Completed" : canComplete ? "Complete Task" : `Need ${task.coin_cost} coins`}
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        };
+        
+        const ReferralsPage = () => {
+            const { user, referrals } = useGlobal();
+            const toast = useToast();
+            
+            if (!user) return null;
+            
+            const userReferrals = referrals.filter(r => r.referrer_id === user.id);
+            const verified = userReferrals.filter(r => r.status === "verified");
+            const totalEarned = verified.reduce((sum, r) => sum + r.reward_earned, 0);
+            
+            const copyCode = () => {
+                navigator.clipboard.writeText(user.referral_code);
+                toast({ title: "Copied!", type: "success" });
+            };
+            
+            const shareWhatsApp = () => {
+                const text = `Join RewardHub with my code: ${user.referral_code}. Start earning today!`;
+                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+            };
+            
+            return (
+                <div className="dashboard-container">
+                    <div className="welcome-section">
+                        <h1>Referrals</h1>
+                        <p style={{ color: "#6b6f7e" }}>Invite friends and earn rewards</p>
+                    </div>
+                    
+                    <div className="stat-box" style={{ marginBottom: 20, background: "linear-gradient(135deg, rgba(139,92,246,0.1), rgba(6,182,212,0.05))" }}>
+                        <div style={{ marginBottom: 16 }}>
+                            <div style={{ fontSize: 12, color: "#6b6f7e", marginBottom: 8 }}>Your Referral Code</div>
+                            <div className="referral-box">
+                                <code className="referral-code">{user.referral_code}</code>
+                                <div style={{ display: "flex", gap: 8 }}>
+                                    <button className="btn btn-secondary btn-sm" onClick={copyCode}>Copy</button>
+                                    <button className="btn btn-secondary btn-sm" onClick={shareWhatsApp}>WhatsApp</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style={{ textAlign: "center", padding: 12, background: "rgba(0,0,0,0.2)", borderRadius: 12 }}>
+                            <div style={{ fontSize: 13, marginBottom: 8 }}>How it works:</div>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#6b6f7e" }}>
+                                <span>1. Share code</span>
+                                <span>→</span>
+                                <span>2. Friend signs up</span>
+                                <span>→</span>
+                                <span>3. Friend buys package</span>
+                                <span>→</span>
+                                <span>4. You earn 50 KSH + 15 coins</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="stats-grid">
+                        <div className="stat-box">
+                            <div className="stat-label">Total Referrals</div>
+                            <div className="stat-value purple">{userReferrals.length}</div>
+                        </div>
+                        <div className="stat-box">
+                            <div className="stat-label">Verified</div>
+                            <div className="stat-value green">{verified.length}</div>
+                        </div>
+                        <div className="stat-box">
+                            <div className="stat-label">Earned</div>
+                            <div className="stat-value amber">{totalEarned} KSH</div>
+                        </div>
+                    </div>
+                    
+                    {userReferrals.length === 0 ? (
+                        <div className="stat-box" style={{ textAlign: "center", padding: 48 }}>
+                            <div style={{ fontSize: 48, marginBottom: 16 }}>👥</div>
+                            <div style={{ fontWeight: 600, marginBottom: 8 }}>No referrals yet</div>
+                            <div style={{ fontSize: 13, color: "#6b6f7e" }}>Share your code and start earning!</div>
+                        </div>
+                    ) : (
+                        <div className="stat-box">
+                            <div style={{ fontWeight: 600, marginBottom: 16 }}>Referral History</div>
+                            <div style={{ overflowX: "auto" }}>
+                                <table style={{ width: "100%", fontSize: 13 }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                                            <th style={{ textAlign: "left", padding: "12px 0" }}>User</th>
+                                            <th style={{ textAlign: "left", padding: "12px 0" }}>Status</th>
+                                            <th style={{ textAlign: "right", padding: "12px 0" }}>Reward</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {userReferrals.map(ref => (
+                                            <tr key={ref.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                                                <td style={{ padding: "12px 0" }}>{ref.referee_id.slice(-8)}</td>
+                                                <td style={{ padding: "12px 0" }}>
+                                                    <span style={{ color: ref.status === "verified" ? "#10b981" : "#f59e0b" }}>{ref.status}</span>
+                                                </td>
+                                                <td style={{ padding: "12px 0", textAlign: "right", color: "#10b981" }}>{ref.reward_earned} KSH</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+        
+        const WalletPage = () => {
+            const { user } = useGlobal();
+            const toast = useToast();
+            const [amount, setAmount] = useState("");
+            const withdrawals = storage.get(`rh_withdrawals_${user?.id}`) || [];
+            
+            if (!user) return null;
+            
+            const requestWithdrawal = () => {
+                const amt = parseFloat(amount);
+                if (amt < 1500) {
+                    toast({ title: "Minimum 1,500 KSH", type: "error" });
+                    return;
+                }
+                if (amt > user.available_balance) {
+                    toast({ title: "Insufficient balance", type: "error" });
+                    return;
+                }
+                
+                const newWithdrawal = {
+                    id: generateId(),
+                    amount: amt,
+                    status: "pending",
+                    created_at: new Date().toISOString(),
+                };
+                storage.set(`rh_withdrawals_${user.id}`, [newWithdrawal, ...withdrawals]);
+                toast({ title: "Withdrawal requested!", message: "Pending admin approval", type: "success" });
+                setAmount("");
+            };
+            
+            return (
+                <div className="dashboard-container">
+                    <div className="welcome-section">
+                        <h1>Wallet</h1>
+                        <p style={{ color: "#6b6f7e" }}>Manage your earnings and withdrawals</p>
+                    </div>
+                    
+                    <div className="stats-grid">
+                        <div className="stat-box">
+                            <div className="stat-label">Available</div>
+                            <div className="stat-value green">{user.available_balance.toLocaleString()} KSH</div>
+                        </div>
+                        <div className="stat-box">
+                            <div className="stat-label">Pending</div>
+                            <div className="stat-value cyan">{user.pending_balance.toLocaleString()} KSH</div>
+                        </div>
+                        <div className="stat-box">
+                            <div className="stat-label">Coins</div>
+                            <div className="stat-value purple">{user.coins_balance}</div>
+                        </div>
+                        <div className="stat-box">
+                            <div className="stat-label">Total Earned</div>
+                            <div className="stat-value amber">{user.total_earned.toLocaleString()} KSH</div>
+                        </div>
+                    </div>
+                    
+                    {user.available_balance >= 1500 && (
+                        <div className="stat-box" style={{ marginBottom: 20 }}>
+                            <div style={{ fontWeight: 600, marginBottom: 16 }}>Request Withdrawal</div>
+                            <div className="form-group">
+                                <label className="form-label">Amount (KSH)</label>
+                                <input className="form-input" type="number" placeholder="1500" min="1500" value={amount} onChange={e => setAmount(e.target.value)} />
+                            </div>
+                            <button className="btn btn-primary w-full" onClick={requestWithdrawal}>Request Withdrawal</button>
+                        </div>
+                    )}
+                    
+                    {user.available_balance < 1500 && (
+                        <div className="stat-box" style={{ marginBottom: 20, background: "rgba(245,158,11,0.1)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                                <span style={{ fontSize: 24 }}>🔒</span>
+                                <div>
+                                    <div style={{ fontWeight: 600, marginBottom: 4 }}>Minimum Withdrawal: 1,500 KSH</div>
+                                    <div style={{ fontSize: 12, color: "#6b6f7e" }}>Need {(1500 - user.available_balance).toLocaleString()} KSH more</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {withdrawals.length > 0 && (
+                        <div className="stat-box">
+                            <div style={{ fontWeight: 600, marginBottom: 16 }}>Withdrawal History</div>
+                            <div style={{ overflowX: "auto" }}>
+                                <table style={{ width: "100%", fontSize: 13 }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                                            <th style={{ textAlign: "left", padding: "12px 0" }}>Amount</th>
+                                            <th style={{ textAlign: "left", padding: "12px 0" }}>Status</th>
+                                            <th style={{ textAlign: "right", padding: "12px 0" }}>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {withdrawals.map(w => (
+                                            <tr key={w.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                                                <td style={{ padding: "12px 0", fontWeight: 600 }}>{w.amount.toLocaleString()} KSH</td>
+                                                <td style={{ padding: "12px 0" }}>
+                                                    <span style={{ color: w.status === "completed" ? "#10b981" : w.status === "pending" ? "#f59e0b" : "#ef4444" }}>{w.status}</span>
+                                                </td>
+                                                <td style={{ padding: "12px 0", textAlign: "right", color: "#6b6f7e" }}>{new Date(w.created_at).toLocaleDateString()}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+        
+        const DepositsPage = ({ setPage }) => {
+            const { user, packages, purchasePackage } = useGlobal();
+            const toast = useToast();
+            const [loading, setLoading] = useState(null);
+            
+            if (!user) return null;
+            
+            const handlePurchase = async (pkg) => {
+                setLoading(pkg.id);
+                await new Promise(r => setTimeout(r, 1000));
+                await purchasePackage(pkg);
+                setLoading(null);
+                toast({ title: "Purchase successful!", message: `${pkg.coins} coins added`, type: "success" });
+            };
+            
+            return (
+                <div className="dashboard-container">
+                    <button className="btn btn-secondary btn-sm" style={{ marginBottom: 20 }} onClick={() => setPage("dashboard")}>← Back</button>
+                    
+                    <div className="welcome-section">
+                        <h1>Buy Coins</h1>
+                        <p style={{ color: "#6b6f7e" }}>Purchase packages to get coins and unlock tasks</p>
+                    </div>
+                    
+                    <div className="stat-box" style={{ marginBottom: 20 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            <div>
+                                <div style={{ fontSize: 13, color: "#6b6f7e" }}>Current Balance</div>
+                                <div style={{ fontSize: 28, fontWeight: 700, color: "#06b6d4" }}>{user.coins_balance} coins</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: 13, color: "#6b6f7e" }}>Available KSH</div>
+                                <div style={{ fontSize: 28, fontWeight: 700, color: "#10b981" }}>{user.available_balance.toLocaleString()} KSH</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {packages.map(pkg => (
+                        <div key={pkg.id} className={`package-card ${pkg.popular ? "popular" : ""}`}>
+                            {pkg.popular && <div className="popular-badge">Most Popular</div>}
+                            <div className="package-name">{pkg.name}</div>
+                            <div className="package-price">{pkg.ksh.toLocaleString()} KSH</div>
+                            <div className="package-coins">⚡ {pkg.coins} coins</div>
+                            <button className="btn btn-primary w-full" onClick={() => handlePurchase(pkg)} disabled={loading}>
+                                {loading === pkg.id ? "Processing..." : `Pay ${pkg.ksh} KSH →`}
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+        
+        const AccountPage = ({ setPage }) => {
+            const { user } = useGlobal();
+            const { logout } = useAuth();
+            const toast = useToast();
+            
+            if (!user) return null;
+            
+            const copyCode = () => {
+                navigator.clipboard.writeText(user.referral_code);
+                toast({ title: "Copied!", type: "success" });
+            };
+            
+            return (
+                <div className="dashboard-container">
+                    <div className="welcome-section" style={{ textAlign: "center" }}>
+                        <div style={{ width: 80, height: 80, background: "linear-gradient(135deg, #10b981, #06b6d4)", borderRadius: 40, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 32, fontWeight: 700 }}>{user.username[0].toUpperCase()}</div>
+                        <h1>{user.username}</h1>
+                        <p style={{ color: "#6b6f7e" }}>{user.email}</p>
+                        {user.is_admin && <span style={{ display: "inline-block", marginTop: 8, padding: "4px 12px", background: "#8b5cf6", borderRadius: 20, fontSize: 12 }}>Admin</span>}
+                    </div>
+                    
+                    <div className="stat-box" style={{ marginBottom: 20 }}>
+                        <div style={{ fontWeight: 600, marginBottom: 16 }}>Account Details</div>
+                        <div className="referral-box" style={{ justifyContent: "space-between", marginBottom: 12 }}>
+                            <div>
+                                <div style={{ fontSize: 11, color: "#6b6f7e", marginBottom: 4 }}>Referral Code</div>
+                                <code>{user.referral_code}</code>
+                            </div>
+                            <button className="btn btn-secondary btn-sm" onClick={copyCode}>Copy</button>
+                        </div>
+                        <div style={{ padding: "12px 0", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+                            <div style={{ fontSize: 11, color: "#6b6f7e", marginBottom: 4 }}>Member Since</div>
+                            <div>{new Date(user.created_at).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                    
+                    {user.is_admin && (
+                        <div className="action-card" onClick={() => setPage("admin")}>
+                            <div className="action-icon">⚙️</div>
+                            <div className="action-content">
+                                <div className="action-title">Admin Panel</div>
+                                <div className="action-desc">Manage users, tasks, and withdrawals</div>
+                            </div>
+                            <span>→</span>
+                        </div>
+                    )}
+                    
+                    <button className="btn btn-danger w-full" onClick={logout}>Sign Out</button>
+                </div>
+            );
+        };
+        
+        const AdminPage = ({ setPage }) => {
+            const { user, tasks } = useGlobal();
+            const [allUsers, setAllUsers] = useState([]);
+            const [withdrawals, setWithdrawals] = useState([]);
+            
+            useEffect(() => {
+                setAllUsers(storage.get("rh_all_users") || []);
+                const allWithdrawals = [];
+                const users = storage.get("rh_all_users") || [];
+                users.forEach(u => {
+                    const w = storage.get(`rh_withdrawals_${u.id}`) || [];
+                    w.forEach(wd => allWithdrawals.push({ ...wd, username: u.username }));
+                });
+                setWithdrawals(allWithdrawals);
+            }, []);
+            
+            if (!user?.is_admin) {
+                setPage("dashboard");
+                return null;
+            }
+            
+            return (
+                <div className="dashboard-container">
+                    <button className="btn btn-secondary btn-sm" style={{ marginBottom: 20 }} onClick={() => setPage("account")}>← Back</button>
+                    
+                    <div className="welcome-section">
+                        <h1>Admin Panel</h1>
+                        <p style={{ color: "#6b6f7e" }}>Platform management</p>
+                    </div>
+                    
+                    <div className="stats-grid">
+                        <div className="stat-box">
+                            <div className="stat-label">Total Users</div>
+                            <div className="stat-value">{allUsers.length}</div>
+                        </div>
+                        <div className="stat-box">
+                            <div className="stat-label">Pending Withdrawals</div>
+                            <div className="stat-value amber">{withdrawals.filter(w => w.status === "pending").length}</div>
+                        </div>
+                        <div className="stat-box">
+                            <div className="stat-label">Active Tasks</div>
+                            <div className="stat-value">{tasks.filter(t => t.is_active).length}</div>
+                        </div>
+                    </div>
+                    
+                    <div className="stat-box">
+                        <div style={{ fontWeight: 600, marginBottom: 16 }}>Users</div>
+                        <div style={{ overflowX: "auto" }}>
+                            <table style={{ width: "100%", fontSize: 13 }}>
+                                <thead>
+                                    <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                                        <th style={{ textAlign: "left", padding: "12px 0" }}>User</th>
+                                        <th style={{ textAlign: "left", padding: "12px 0" }}>Balance</th>
+                                        <th style={{ textAlign: "left", padding: "12px 0" }}>Coins</th>
+                                        <th style={{ textAlign: "left", padding: "12px 0" }}>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {allUsers.map(u => (
+                                        <tr key={u.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                                            <td style={{ padding: "12px 0" }}>
+                                                <div style={{ fontWeight: 600 }}>{u.username}</div>
+                                                <div style={{ fontSize: 11, color: "#6b6f7e" }}>{u.email}</div>
+                                            </td>
+                                            <td style={{ padding: "12px 0" }}>{u.available_balance} KSH</td>
+                                            <td style={{ padding: "12px 0" }}>{u.coins_balance}</td>
+                                            <td style={{ padding: "12px 0" }}>
+                                                <span style={{ color: u.is_banned ? "#ef4444" : "#10b981" }}>{u.is_banned ? "Banned" : "Active"}</span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        // Main App Component
+        const App = () => {
+            const { user, loading } = useAuth();
+            const [page, setPage] = useState("landing");
+            
+            useEffect(() => {
+                if (loading) return;
+                if (user && (page === "landing" || page === "login" || page === "signup")) {
+                    setPage("dashboard");
+                } else if (!user && !["landing", "login", "signup"].includes(page)) {
+                    setPage("landing");
+                }
+            }, [user, loading, page]);
+            
+            if (loading) return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}><div className="spinner"></div></div>;
+            
+            const renderPage = () => {
+                switch(page) {
+                    case "landing": return <LandingPage setPage={setPage} />;
+                    case "login": return <LoginPage setPage={setPage} />;
+                    case "signup": return <SignupPage setPage={setPage} />;
+                    case "dashboard": return <DashboardPage setPage={setPage} />;
+                    case "tasks": return <TasksPage />;
+                    case "referrals": return <ReferralsPage />;
+                    case "wallet": return <WalletPage />;
+                    case "deposits": return <DepositsPage setPage={setPage} />;
+                    case "account": return <AccountPage setPage={setPage} />;
+                    case "admin": return <AdminPage setPage={setPage} />;
+                    default: return <DashboardPage setPage={setPage} />;
+                }
+            };
+            
+            const showBottomNav = user && !["landing", "login", "signup", "admin"].includes(page);
+            const navItems = [
+                { id: "dashboard", label: "Home", icon: "🏠" },
+                { id: "tasks", label: "Tasks", icon: "⚡" },
+                { id: "referrals", label: "Refer", icon: "👥" },
+                { id: "wallet", label: "Wallet", icon: "💳" },
+                { id: "account", label: "Account", icon: "👤" },
+            ];
+            
+            return (
+                <div className="rewardhub-app">
+                    {user && (
+                        <div className="landing-header">
+                            <span className="logo">RewardHub</span>
+                            <div className="balance-widget" style={{ display: "flex", gap: 16, background: "rgba(0,0,0,0.3)", padding: "8px 16px", borderRadius: 20 }}>
+                                <span>💰 {user.available_balance} KSH</span>
+                                <span>⚡ {user.coins_balance}</span>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {renderPage()}
+                    
+                    {showBottomNav && (
+                        <div className="bottom-nav">
+                            {navItems.map(item => (
+                                <button key={item.id} className={`nav-item ${page === item.id ? "active" : ""}`} onClick={() => setPage(item.id)}>
+                                    <span className="nav-icon">{item.icon}</span>
+                                    <span className="nav-label">{item.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+        
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById("root"));
+        root.render(
+            <AuthProvider>
+                <GlobalProvider>
+                    <ToastProvider>
+                        <App />
+                    </ToastProvider>
+                </GlobalProvider>
+            </AuthProvider>
+        );
     </script>
 </body>
-</html>
+    </html>
