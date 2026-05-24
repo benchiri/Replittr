@@ -1,0 +1,2152 @@
+import { useState, useEffect, useContext, createContext, useCallback, useRef } from "react";
+
+// ─── DESIGN TOKENS (UPGRADED) ─────────────────────────────────────────────────
+const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #0a0c10;
+    --bg-secondary: #0f1117;
+    --bg-tertiary: #15171f;
+    --surface: #1a1d26;
+    --surface-elevated: #22252f;
+    --surface-glass: rgba(26, 29, 38, 0.8);
+    --border: rgba(255,255,255,0.06);
+    --border-light: rgba(255,255,255,0.1);
+    --text-primary: #ffffff;
+    --text-secondary: #a1a5b5;
+    --text-tertiary: #6b6f7e;
+    --accent-green: #10b981;
+    --accent-green-glow: rgba(16, 185, 129, 0.15);
+    --accent-cyan: #06b6d4;
+    --accent-cyan-glow: rgba(6, 182, 212, 0.15);
+    --accent-purple: #8b5cf6;
+    --accent-purple-glow: rgba(139, 92, 246, 0.15);
+    --accent-amber: #f59e0b;
+    --accent-amber-glow: rgba(245, 158, 11, 0.15);
+    --accent-red: #ef4444;
+    --accent-red-glow: rgba(239, 68, 68, 0.15);
+    --gradient-primary: linear-gradient(135deg, #10b981, #06b6d4);
+    --gradient-secondary: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    --gradient-gold: linear-gradient(135deg, #f59e0b, #fcd34d);
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+    --shadow-xl: 0 16px 48px rgba(0,0,0,0.6);
+    --glow-green: 0 0 20px rgba(16, 185, 129, 0.3);
+    --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.3);
+    --glow-purple: 0 0 20px rgba(139, 92, 246, 0.3);
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  html, body, #root { height: 100%; background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-body); font-size: 15px; line-height: 1.5; scroll-behavior: smooth; }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-tertiary); }
+  ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent-green); }
+
+  /* Glassmorphism Base */
+  .glass { background: var(--surface-glass); backdrop-filter: blur(12px); border: 1px solid var(--border); }
+  .glass-card { background: var(--surface-glass); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+
+  /* Layout */
+  .app { display: flex; flex-direction: column; min-height: 100vh; background: radial-gradient(ellipse at top, var(--bg-secondary), var(--bg-primary)); }
+  .page { flex: 1; padding: 20px 20px 100px; max-width: 900px; margin: 0 auto; width: 100%; }
+
+  /* Top Navigation */
+  .topbar { position: sticky; top: 0; z-index: 100; background: var(--surface-glass); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar-brand { font-family: var(--font-display); font-weight: 800; font-size: 22px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em; }
+  .balance-widget { background: var(--surface); border-radius: var(--radius-lg); padding: 6px 14px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); transition: all var(--transition-base); cursor: pointer; }
+  .balance-widget:hover { border-color: var(--accent-green); background: var(--surface-elevated); transform: translateY(-1px); }
+  .balance-item { display: flex; align-items: baseline; gap: 4px; }
+  .balance-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); }
+  .balance-value { font-weight: 700; font-size: 15px; transition: all var(--transition-smooth); }
+  .balance-value.green { color: var(--accent-green); }
+  .balance-value.cyan { color: var(--accent-cyan); }
+  .balance-change { position: absolute; animation: slideUpFade 1s ease-out forwards; pointer-events: none; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  @keyframes slideUpFade { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-20px); } }
+
+  /* Bottom Navigation */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: var(--surface-glass); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; padding: 8px 12px env(safe-area-inset-bottom, 12px); gap: 4px; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 4px; cursor: pointer; color: var(--text-tertiary); transition: all var(--transition-fast); border: none; background: none; font-family: var(--font-body); border-radius: var(--radius-md); }
+  .nav-item.active { color: var(--accent-green); background: var(--accent-green-glow); }
+  .nav-item svg { width: 22px; height: 22px; transition: transform var(--transition-fast); }
+  .nav-item:active svg { transform: scale(0.95); }
+  .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; transition: all var(--transition-base); }
+  .card:hover { border-color: var(--border-light); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .card-gradient { background: linear-gradient(135deg, var(--surface), var(--surface-elevated)); border: 1px solid var(--border-light); }
+
+  /* Stats Grid */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; position: relative; overflow: hidden; transition: all var(--transition-base); cursor: pointer; }
+  .stat-card:hover { transform: translateY(-2px); border-color: var(--border-light); }
+  .stat-card::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity var(--transition-base); pointer-events: none; }
+  .stat-card:hover::before { opacity: 1; }
+  .stat-card.green::before { background: radial-gradient(circle at top right, var(--accent-green-glow), transparent 70%); }
+  .stat-card.cyan::before { background: radial-gradient(circle at top right, var(--accent-cyan-glow), transparent 70%); }
+  .stat-card.purple::before { background: radial-gradient(circle at top right, var(--accent-purple-glow), transparent 70%); }
+  .stat-card.amber::before { background: radial-gradient(circle at top right, var(--accent-amber-glow), transparent 70%); }
+  .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); margin-bottom: 8px; }
+  .stat-value { font-family: var(--font-display); font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+  .stat-value.green { color: var(--accent-green); }
+  .stat-value.cyan { color: var(--accent-cyan); }
+  .stat-value.purple { color: var(--accent-purple); }
+  .stat-value.amber { color: var(--accent-amber); }
+  .stat-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: var(--radius-md); font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all var(--transition-fast); letter-spacing: 0.01em; position: relative; overflow: hidden; }
+  .btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent); opacity: 0; transition: opacity var(--transition-fast); }
+  .btn:hover::before { opacity: 1; }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-primary { background: var(--gradient-primary); color: #ffffff; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
+  .btn-primary:hover:not(:disabled) { box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5); transform: translateY(-1px); }
+  .btn-secondary { background: var(--surface-elevated); color: var(--text-primary); border: 1px solid var(--border-light); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--accent-green); color: var(--accent-green); background: var(--accent-green-glow); }
+  .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.2); }
+  .btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.2); border-color: var(--accent-red); }
+  .btn-full { width: 100%; }
+  .btn-sm { padding: 8px 16px; font-size: 13px; }
+  .btn-lg { padding: 14px 24px; font-size: 16px; }
+
+  /* Inputs */
+  .input-group { margin-bottom: 20px; }
+  .input-label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); margin-bottom: 8px; }
+  .input { width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 16px; color: var(--text-primary); font-family: var(--font-body); font-size: 14px; transition: all var(--transition-fast); outline: none; }
+  .input:focus { border-color: var(--accent-green); box-shadow: 0 0 0 3px var(--accent-green-glow); }
+  .input::placeholder { color: var(--text-tertiary); }
+  .select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b6f7e' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 44px; cursor: pointer; }
+  textarea.input { resize: vertical; min-height: 100px; font-family: var(--font-body); }
+
+  /* Modals */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn var(--transition-base); }
+  .modal { background: var(--surface-elevated); border: 1px solid var(--border-light); border-radius: var(--radius-xl); max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; animation: slideUp var(--transition-smooth); }
+  .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-body { padding: 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 12px; justify-content: flex-end; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Task Cards */
+  .task-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 12px; transition: all var(--transition-base); cursor: pointer; }
+  .task-card:hover { transform: translateX(4px); border-color: var(--border-light); }
+  .task-card.completed { opacity: 0.6; filter: grayscale(0.2); }
+  .task-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+  .task-badge.social { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+  .task-badge.writing { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+  .task-badge.editing { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+  .task-badge.listening { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+  .task-badge.learning { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+
+  /* Progress & Animations */
+  .progress-bar { height: 100%; border-radius: 100px; background: var(--gradient-primary); transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: hidden; }
+  .progress-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation: shimmer 2s infinite; }
+  @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+  /* Alert / Toast */
+  .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1100; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+  .toast { background: var(--surface-elevated); border-radius: var(--radius-md); padding: 14px 18px; pointer-events: auto; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-lg); animation: slideInRight var(--transition-smooth); border-left: 3px solid; max-width: 360px; }
+  .toast-success { border-left-color: var(--accent-green); background: linear-gradient(135deg, var(--surface-elevated), rgba(16, 185, 129, 0.1)); }
+  .toast-error { border-left-color: var(--accent-red); background: linear-gradient(135deg, var(--surface-elevated), rgba(239, 68, 68, 0.1)); }
+  .toast-info { border-left-color: var(--accent-cyan); background: linear-gradient(135deg, var(--surface-elevated), rgba(6, 182, 212, 0.1)); }
+  @keyframes slideInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+
+  /* Skeleton Loading */
+  .skeleton { background: linear-gradient(90deg, var(--surface), var(--surface-elevated), var(--surface)); background-size: 200% 100%; animation: skeletonLoading 1.5s infinite; border-radius: var(--radius-md); }
+  @keyframes skeletonLoading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* Utilities */
+  .flex { display: flex; }
+  .flex-col { flex-direction: column; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .justify-center { justify-content: center; }
+  .gap-4 { gap: 4px; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+  .gap-16 { gap: 16px; }
+  .gap-20 { gap: 20px; }
+  .mb-4 { margin-bottom: 4px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-12 { margin-bottom: 12px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-20 { margin-bottom: 20px; }
+  .mb-24 { margin-bottom: 24px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-24 { margin-top: 24px; }
+  .p-16 { padding: 16px; }
+  .p-20 { padding: 20px; }
+  .text-center { text-align: center; }
+  .text-sm { font-size: 13px; }
+  .text-xs { font-size: 11px; }
+  .text-muted { color: var(--text-tertiary); }
+  .font-bold { font-weight: 700; }
+  .font-display { font-family: var(--font-display); }
+  .text-green { color: var(--accent-green); }
+  .text-cyan { color: var(--accent-cyan); }
+  .text-purple { color: var(--accent-purple); }
+  .text-amber { color: var(--accent-amber); }
+  .text-red { color: var(--accent-red); }
+  .w-full { width: 100%; }
+
+  /* Spinner */
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent-green); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 40px auto; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+`;
+
+// ─── TYPES ────────────────────────────────────────────────────────────────────
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  password: string;
+  referral_code: string;
+  referred_by: string | null;
+  total_earned: number;
+  available_balance: number;
+  pending_balance: number;
+  coins_balance: number;
+  total_referrals: number;
+  is_admin: boolean;
+  is_superadmin: boolean;
+  has_purchased_package: boolean;
+  email_verified: boolean;
+  is_banned: boolean;
+  created_at: string;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  category: "social" | "writing" | "editing" | "listening" | "learning";
+  reward: number;
+  coin_cost: number;
+  difficulty: "Easy" | "Medium" | "Hard";
+  external_link?: string;
+  instructions?: string;
+  is_active: boolean;
+  requires_review: boolean;
+  created_at: string;
+}
+
+interface WritingTask extends Task {
+  category: "writing";
+  prompt: string;
+  min_words: number;
+}
+
+interface EditingTask extends Task {
+  category: "editing";
+  media_url: string;
+  editing_instructions: string;
+}
+
+interface ListeningTask extends Task {
+  category: "listening";
+  audio_url: string;
+  validation_question: string;
+  validation_answer: string;
+}
+
+interface LearningTask extends Task {
+  category: "learning";
+  vocabulary_word: string;
+  word_definition: string;
+  example_sentence: string;
+}
+
+interface Package {
+  id: string;
+  name: string;
+  ksh: number;
+  coins: number;
+  popular?: boolean;
+}
+
+interface Withdrawal {
+  id: string;
+  amount: number;
+  status: "pending" | "processing" | "completed" | "rejected";
+  payment_method: string;
+  created_at: string;
+}
+
+interface Referral {
+  id: string;
+  referrer_id: string;
+  referee_id: string;
+  status: "pending" | "verified";
+  reward_earned: number;
+  coins_earned: number;
+  created_at: string;
+}
+
+interface TaskCompletion {
+  task_id: string;
+  user_id: string;
+  completed_at: string;
+  reward_earned: number;
+  coins_spent: number;
+  status: "pending" | "approved" | "rejected";
+  submission_data?: any;
+}
+
+// ─── MOCK DATA (UPGRADED) ─────────────────────────────────────────────────────
+const INITIAL_TASKS: Task[] = [
+  {
+    id: "t1",
+    title: "Follow on TikTok",
+    description: "Follow our official TikTok account and like the pinned video",
+    category: "social",
+    reward: 50,
+    coin_cost: 5,
+    difficulty: "Easy",
+    external_link: "https://tiktok.com/@rewardhub",
+    is_active: true,
+    requires_review: false,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "t2",
+    title: "Instagram Story Share",
+    description: "Share our Instagram story and tag us",
+    category: "social",
+    reward: 75,
+    coin_cost: 8,
+    difficulty: "Easy",
+    external_link: "https://instagram.com/rewardhub",
+    is_active: true,
+    requires_review: true,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "t3",
+    title: "Write a Short Review",
+    description: "Write a 100-word review about your experience",
+    category: "writing",
+    reward: 150,
+    coin_cost: 15,
+    difficulty: "Medium",
+    is_active: true,
+    requires_review: true,
+    created_at: new Date().toISOString(),
+    prompt: "Describe your experience with our platform and how it has helped you earn rewards.",
+    min_words: 100,
+  } as WritingTask,
+  {
+    id: "t4",
+    title: "Video Editing Challenge",
+    description: "Edit a 30-second clip with captions and effects",
+    category: "editing",
+    reward: 200,
+    coin_cost: 20,
+    difficulty: "Hard",
+    is_active: true,
+    requires_review: true,
+    created_at: new Date().toISOString(),
+    media_url: "/sample-video.mp4",
+    editing_instructions: "Add creative captions, apply a filter, and trim to exactly 30 seconds",
+  } as EditingTask,
+  {
+    id: "t5",
+    title: "Listening Comprehension",
+    description: "Listen to the audio and answer the question correctly",
+    category: "listening",
+    reward: 60,
+    coin_cost: 6,
+    difficulty: "Easy",
+    is_active: true,
+    requires_review: false,
+    created_at: new Date().toISOString(),
+    audio_url: "/sample-audio.mp3",
+    validation_question: "What is the main topic discussed?",
+    validation_answer: "cryptocurrency",
+  } as ListeningTask,
+  {
+    id: "t6",
+    title: "Vocabulary Builder: 'Ephemeral'",
+    description: "Learn the word 'ephemeral' and use it in a sentence",
+    category: "learning",
+    reward: 80,
+    coin_cost: 8,
+    difficulty: "Medium",
+    is_active: true,
+    requires_review: true,
+    created_at: new Date().toISOString(),
+    vocabulary_word: "ephemeral",
+    word_definition: "Lasting for a very short time",
+    example_sentence: "The beauty of a sunset is ephemeral, lasting only moments.",
+  } as LearningTask,
+  {
+    id: "t7",
+    title: "YouTube Video Watch",
+    description: "Watch our latest YouTube video for 2 minutes",
+    category: "social",
+    reward: 40,
+    coin_cost: 4,
+    difficulty: "Easy",
+    external_link: "https://youtube.com/watch?v=example",
+    is_active: true,
+    requires_review: false,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "t8",
+    title: "Creative Writing: Blog Post",
+    description: "Write a 300-word blog post about remote earning",
+    category: "writing",
+    reward: 300,
+    coin_cost: 30,
+    difficulty: "Hard",
+    is_active: true,
+    requires_review: true,
+    created_at: new Date().toISOString(),
+    prompt: "Write an engaging blog post about 'How to Earn Money Online from Home'",
+    min_words: 300,
+  } as WritingTask,
+];
+
+const PACKAGES: Package[] = [
+  { id: "small", name: "Starter", ksh: 300, coins: 30 },
+  { id: "medium", name: "Growth", ksh: 500, coins: 70 },
+  { id: "premium", name: "Premium", ksh: 1000, coins: 150, popular: true },
+];
+
+const generateReferralCode = (username: string) => `${username.slice(0, 4)}${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+// ─── STORAGE ──────────────────────────────────────────────────────────────────
+const storage = {
+  get: <T>(key: string): T | null => {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : null;
+    } catch {
+      return null;
+    }
+  },
+  set: <T>(key: string, value: T): void => {
+    localStorage.setItem(key, JSON.stringify(value));
+  },
+  remove: (key: string): void => {
+    localStorage.removeItem(key);
+  },
+};
+
+// ─── GLOBAL STATE CONTEXT ─────────────────────────────────────────────────────
+interface GlobalState {
+  user: User | null;
+  tasks: Task[];
+  packages: Package[];
+  referrals: Referral[];
+  taskCompletions: TaskCompletion[];
+  withdrawals: Withdrawal[];
+  updateUser: (updates: Partial<User>) => void;
+  addCoins: (amount: number, source: string) => void;
+  addBalance: (amount: number, source: string) => void;
+  deductCoins: (amount: number, reason: string) => boolean;
+  completeTask: (task: Task) => Promise<boolean>;
+  purchasePackage: (pkg: Package) => Promise<boolean>;
+  requestWithdrawal: (amount: number, method: string) => Promise<boolean>;
+  refreshBalances: () => void;
+}
+
+const GlobalStateContext = createContext<GlobalState | null>(null);
+
+function GlobalStateProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [tasks, setTasks] = useState<Task[]>(() => storage.get("rh_tasks") || INITIAL_TASKS);
+  const [packages] = useState<Package[]>(PACKAGES);
+  const [referrals, setReferrals] = useState<Referral[]>(() => storage.get("rh_referrals") || []);
+  const [taskCompletions, setTaskCompletions] = useState<TaskCompletion[]>(() => storage.get("rh_task_completions") || []);
+  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>(() => storage.get("rh_withdrawals") || []);
+
+  const showBalanceAnimation = useCallback((amount: number, type: "ksh" | "coins", elementId?: string) => {
+    const event = new CustomEvent("balanceChange", { detail: { amount, type, elementId } });
+    window.dispatchEvent(event);
+  }, []);
+
+  const updateUser = useCallback((updates: Partial<User>) => {
+    if (!user) return;
+    const updated = { ...user, ...updates };
+    setUser(updated);
+    storage.set("rh_user", updated);
+    const allUsers = storage.get<User[]>("rh_all_users") || [];
+    storage.set("rh_all_users", allUsers.map(u => u.id === updated.id ? updated : u));
+  }, [user]);
+
+  const addCoins = useCallback((amount: number, source: string) => {
+    if (!user) return;
+    const newCoins = user.coins_balance + amount;
+    updateUser({ coins_balance: newCoins });
+    showBalanceAnimation(amount, "coins");
+  }, [user, updateUser, showBalanceAnimation]);
+
+  const addBalance = useCallback((amount: number, source: string) => {
+    if (!user) return;
+    const newBalance = user.available_balance + amount;
+    const newTotal = user.total_earned + amount;
+    updateUser({ available_balance: newBalance, total_earned: newTotal });
+    showBalanceAnimation(amount, "ksh");
+  }, [user, updateUser, showBalanceAnimation]);
+
+  const deductCoins = useCallback((amount: number, reason: string): boolean => {
+    if (!user) return false;
+    if (user.coins_balance < amount) return false;
+    updateUser({ coins_balance: user.coins_balance - amount });
+    showBalanceAnimation(-amount, "coins");
+    return true;
+  }, [user, updateUser, showBalanceAnimation]);
+
+  const completeTask = useCallback(async (task: Task): Promise<boolean> => {
+    if (!user) return false;
+    
+    const alreadyCompleted = taskCompletions.some(tc => tc.task_id === task.id && tc.user_id === user.id);
+    if (alreadyCompleted) return false;
+    
+    if (!deductCoins(task.coin_cost, `Complete task: ${task.title}`)) return false;
+    
+    addBalance(task.reward, `Task completion: ${task.title}`);
+    
+    const completion: TaskCompletion = {
+      task_id: task.id,
+      user_id: user.id,
+      completed_at: new Date().toISOString(),
+      reward_earned: task.reward,
+      coins_spent: task.coin_cost,
+      status: task.requires_review ? "pending" : "approved",
+    };
+    
+    const newCompletions = [...taskCompletions, completion];
+    setTaskCompletions(newCompletions);
+    storage.set("rh_task_completions", newCompletions);
+    
+    return true;
+  }, [user, taskCompletions, deductCoins, addBalance]);
+
+  const purchasePackage = useCallback(async (pkg: Package): Promise<boolean> => {
+    if (!user) return false;
+    
+    addCoins(pkg.coins, `Purchased ${pkg.name} package`);
+    updateUser({ has_purchased_package: true });
+    
+    // If user was referred, give referral reward
+    if (user.referred_by) {
+      const allUsers = storage.get<User[]>("rh_all_users") || [];
+      const referrer = allUsers.find(u => u.id === user.referred_by);
+      if (referrer) {
+        const updatedReferrer = { 
+          ...referrer, 
+          available_balance: referrer.available_balance + 50,
+          total_earned: referrer.total_earned + 50,
+          coins_balance: referrer.coins_balance + 15,
+          total_referrals: referrer.total_referrals + 1,
+        };
+        storage.set("rh_all_users", allUsers.map(u => u.id === referrer.id ? updatedReferrer : u));
+        
+        // Update referral record
+        const updatedReferrals = referrals.map(r => 
+          r.referee_id === user.id ? { ...r, status: "verified" as const, reward_earned: 50, coins_earned: 15 } : r
+        );
+        setReferrals(updatedReferrals);
+        storage.set("rh_referrals", updatedReferrals);
+      }
+    }
+    
+    return true;
+  }, [user, addCoins, updateUser, referrals]);
+
+  const requestWithdrawal = useCallback(async (amount: number, method: string): Promise<boolean> => {
+    if (!user) return false;
+    if (amount < 1500) return false;
+    if (amount > user.available_balance) return false;
+    
+    const withdrawal: Withdrawal = {
+      id: generateId(),
+      amount,
+      status: "pending",
+      payment_method: method,
+      created_at: new Date().toISOString(),
+    };
+    
+    const newWithdrawals = [withdrawal, ...withdrawals];
+    setWithdrawals(newWithdrawals);
+    storage.set("rh_withdrawals", newWithdrawals);
+    
+    updateUser({ 
+      available_balance: user.available_balance - amount,
+      pending_balance: user.pending_balance + amount,
+    });
+    
+    return true;
+  }, [user, withdrawals, updateUser]);
+
+  const refreshBalances = useCallback(() => {
+    const freshUser = storage.get<User>("rh_user");
+    if (freshUser) setUser(freshUser);
+  }, []);
+
+  useEffect(() => {
+    const storedUser = storage.get<User>("rh_user");
+    if (storedUser) setUser(storedUser);
+  }, []);
+
+  return (
+    <GlobalStateContext.Provider value={{
+      user,
+      tasks,
+      packages,
+      referrals,
+      taskCompletions,
+      withdrawals,
+      updateUser,
+      addCoins,
+      addBalance,
+      deductCoins,
+      completeTask,
+      purchasePackage,
+      requestWithdrawal,
+      refreshBalances,
+    }}>
+      {children}
+    </GlobalStateContext.Provider>
+  );
+}
+
+const useGlobalState = () => {
+  const context = useContext(GlobalStateContext);
+  if (!context) throw new Error("useGlobalState must be used within GlobalStateProvider");
+  return context;
+};
+
+// ─── AUTH CONTEXT ─────────────────────────────────────────────────────────────
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  signup: (email: string, password: string, username: string, referralCode: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const storedUser = storage.get<User>("rh_user");
+    setUser(storedUser);
+    setLoading(false);
+  }, []);
+
+  const signup = async (email: string, password: string, username: string, referralCode: string) => {
+    const allUsers = storage.get<User[]>("rh_all_users") || [];
+    
+    if (allUsers.some(u => u.email === email)) throw new Error("Email already registered");
+    if (allUsers.some(u => u.username === username)) throw new Error("Username taken");
+    
+    let referrerId: string | null = null;
+    if (referralCode) {
+      const referrer = allUsers.find(u => u.referral_code === referralCode);
+      if (!referrer) throw new Error("Invalid referral code");
+      referrerId = referrer.id;
+    }
+    
+    const isFirst = allUsers.length === 0;
+    const newUser: User = {
+      id: generateId(),
+      email,
+      username,
+      password,
+      referral_code: generateReferralCode(username),
+      referred_by: referrerId,
+      total_earned: 0,
+      available_balance: 0,
+      pending_balance: 0,
+      coins_balance: 0,
+      total_referrals: 0,
+      is_admin: isFirst,
+      is_superadmin: isFirst,
+      has_purchased_package: false,
+      email_verified: false,
+      is_banned: false,
+      created_at: new Date().toISOString(),
+    };
+    
+    const updatedUsers = [...allUsers, newUser];
+    storage.set("rh_all_users", updatedUsers);
+    
+    if (referrerId) {
+      const newReferral: Referral = {
+        id: generateId(),
+        referrer_id: referrerId,
+        referee_id: newUser.id,
+        status: "pending",
+        reward_earned: 0,
+        coins_earned: 0,
+        created_at: new Date().toISOString(),
+      };
+      const referrals = storage.get<Referral[]>("rh_referrals") || [];
+      storage.set("rh_referrals", [...referrals, newReferral]);
+    }
+    
+    storage.set("rh_user", newUser);
+    setUser(newUser);
+  };
+  
+  const login = async (email: string, password: string) => {
+    const allUsers = storage.get<User[]>("rh_all_users") || [];
+    const found = allUsers.find(u => u.email === email && u.password === password);
+    if (!found) throw new Error("Invalid email or password");
+    if (found.is_banned) throw new Error("Account is banned");
+    storage.set("rh_user", found);
+    setUser(found);
+  };
+  
+  const logout = () => {
+    storage.remove("rh_user");
+    setUser(null);
+  };
+  
+  return (
+    <AuthContext.Provider value={{ user, loading, signup, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
+  return context;
+};
+
+// ─── TOAST CONTEXT ────────────────────────────────────────────────────────────
+interface Toast {
+  id: string;
+  title: string;
+  message?: string;
+  type: "success" | "error" | "info";
+}
+
+const ToastContext = createContext<((toast: Omit<Toast, "id">) => void) | null>(null);
+
+function ToastProvider({ children }: { children: React.ReactNode }) {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  
+  const addToast = useCallback((toast: Omit<Toast, "id">) => {
+    const id = generateId();
+    setToasts(prev => [...prev, { ...toast, id }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 4000);
+  }, []);
+  
+  return (
+    <ToastContext.Provider value={addToast}>
+      {children}
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <div key={toast.id} className={`toast toast-${toast.type}`}>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 2 }}>{toast.title}</div>
+              {toast.message && <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{toast.message}</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </ToastContext.Provider>
+  );
+}
+
+const useToast = () => {
+  const context = useContext(ToastContext);
+  if (!context) throw new Error("useToast must be used within ToastProvider");
+  return context;
+};
+
+// ─── BALANCE WIDGET COMPONENT ─────────────────────────────────────────────────
+function BalanceWidget() {
+  const { user } = useGlobalState();
+  const [animations, setAnimations] = useState<{ id: string; amount: number; type: string; x: number; y: number }[]>([]);
+  
+  useEffect(() => {
+    const handler = (e: CustomEvent) => {
+      const id = generateId();
+      setAnimations(prev => [...prev, { id, amount: e.detail.amount, type: e.detail.type, x: Math.random() * 100 - 50, y: 0 }]);
+      setTimeout(() => {
+        setAnimations(prev => prev.filter(a => a.id !== id));
+      }, 1000);
+    };
+    
+    window.addEventListener("balanceChange", handler as EventListener);
+    return () => window.removeEventListener("balanceChange", handler as EventListener);
+  }, []);
+  
+  if (!user) return null;
+  
+  return (
+    <div className="balance-widget" style={{ position: "relative" }}>
+      <div className="balance-item">
+        <span className="balance-label">KSH</span>
+        <span className="balance-value green">{user.available_balance.toLocaleString()}</span>
+      </div>
+      <div className="balance-item">
+        <span className="balance-label">⚡</span>
+        <span className="balance-value cyan">{user.coins_balance.toLocaleString()}</span>
+      </div>
+      {animations.map(anim => (
+        <div
+          key={anim.id}
+          className="balance-change"
+          style={{
+            position: "absolute",
+            left: `${50 + anim.x}%`,
+            top: "-20px",
+            color: anim.type === "ksh" ? "var(--accent-green)" : "var(--accent-cyan)",
+          }}
+        >
+          {anim.amount > 0 ? `+${anim.amount}` : `${anim.amount}`}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── M-PESA DARAJA SERVICE (SIMULATION) ───────────────────────────────────────
+interface MpesaTransaction {
+  id: string;
+  phoneNumber: string;
+  amount: number;
+  status: "pending" | "success" | "failed";
+  checkoutRequestID?: string;
+  resultCode?: number;
+  resultDesc?: string;
+  timestamp: string;
+}
+
+class MpesaService {
+  private static instance: MpesaService;
+  private transactions: MpesaTransaction[] = [];
+  
+  static getInstance() {
+    if (!MpesaService.instance) {
+      MpesaService.instance = new MpesaService();
+    }
+    return MpesaService.instance;
+  }
+  
+  async initiateSTKPush(phoneNumber: string, amount: number): Promise<{ checkoutRequestID: string }> {
+    console.log(`[M-PESA] Initiating STK Push to ${phoneNumber} for ${amount} KSH`);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const checkoutRequestID = `REQ-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const transaction: MpesaTransaction = {
+      id: generateId(),
+      phoneNumber,
+      amount,
+      status: "pending",
+      checkoutRequestID,
+      timestamp: new Date().toISOString(),
+    };
+    this.transactions.push(transaction);
+    
+    // Simulate callback after 3 seconds
+    setTimeout(() => this.simulateCallback(checkoutRequestID, true), 3000);
+    
+    return { checkoutRequestID };
+  }
+  
+  private async simulateCallback(checkoutRequestID: string, success: boolean) {
+    const transaction = this.transactions.find(t => t.checkoutRequestID === checkoutRequestID);
+    if (!transaction) return;
+    
+    transaction.status = success ? "success" : "failed";
+    transaction.resultCode = success ? 0 : 1037;
+    transaction.resultDesc = success ? "Success" : "User cancelled transaction";
+    
+    console.log(`[M-PESA] Callback received for ${checkoutRequestID}: ${transaction.status}`);
+    
+    window.dispatchEvent(new CustomEvent("mpesaCallback", { detail: transaction }));
+  }
+  
+  async verifyTransaction(checkoutRequestID: string): Promise<MpesaTransaction | null> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return this.transactions.find(t => t.checkoutRequestID === checkoutRequestID) || null;
+  }
+  
+  async processWithdrawal(phoneNumber: string, amount: number): Promise<{ status: string; transactionID: string }> {
+    console.log(`[M-PESA] Processing withdrawal to ${phoneNumber} for ${amount} KSH`);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const transactionID = `WDR-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    return { status: "success", transactionID };
+  }
+}
+
+// ─── M-PESA MODAL COMPONENT ───────────────────────────────────────────────────
+function MpesaModal({ isOpen, onClose, amount, onSuccess }: { isOpen: boolean; onClose: () => void; amount: number; onSuccess: () => void }) {
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<"idle" | "processing" | "success" | "failed">("idle");
+  const toast = useToast();
+  const { addCoins } = useGlobalState();
+  const mpesa = MpesaService.getInstance();
+  
+  useEffect(() => {
+    const handler = (e: CustomEvent) => {
+      const transaction = e.detail;
+      if (transaction.status === "success") {
+        setStatus("success");
+        addCoins(Math.floor(amount / 10), "M-PESA Deposit");
+        toast({ title: "Payment Successful!", message: `${amount} KSH converted to ${Math.floor(amount / 10)} coins`, type: "success" });
+        setTimeout(() => {
+          onSuccess();
+          onClose();
+        }, 1500);
+      } else if (transaction.status === "failed") {
+        setStatus("failed");
+        toast({ title: "Payment Failed", message: transaction.resultDesc || "Please try again", type: "error" });
+      }
+      setLoading(false);
+    };
+    
+    window.addEventListener("mpesaCallback", handler as EventListener);
+    return () => window.removeEventListener("mpesaCallback", handler as EventListener);
+  }, [amount, addCoins, toast, onSuccess, onClose]);
+  
+  const handlePayment = async () => {
+    if (!phoneNumber.match(/^[0-9]{10,12}$/)) {
+      toast({ title: "Invalid Phone Number", message: "Please enter a valid phone number", type: "error" });
+      return;
+    }
+    
+    setLoading(true);
+    setStatus("processing");
+    
+    try {
+      const { checkoutRequestID } = await mpesa.initiateSTKPush(phoneNumber, amount);
+      console.log("STK Push initiated:", checkoutRequestID);
+    } catch (error) {
+      setStatus("failed");
+      setLoading(false);
+      toast({ title: "Error", message: "Failed to initiate payment", type: "error" });
+    }
+  };
+  
+  if (!isOpen) return null;
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>M-PESA Payment</h3>
+          <button className="btn btn-ghost btn-sm" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          {status === "idle" && (
+            <>
+              <div style={{ textAlign: "center", marginBottom: 24 }}>
+                <div style={{ fontSize: 36, marginBottom: 8 }}>💰</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: "var(--accent-green)" }}>KSH {amount.toLocaleString()}</div>
+                <div style={{ fontSize: 14, color: "var(--text-tertiary)", marginTop: 4 }}>
+                  You will receive {Math.floor(amount / 10)} coins
+                </div>
+              </div>
+              <div className="input-group">
+                <label className="input-label">M-PESA Phone Number</label>
+                <input
+                  className="input"
+                  type="tel"
+                  placeholder="0712345678"
+                  value={phoneNumber}
+                  onChange={e => setPhoneNumber(e.target.value)}
+                />
+              </div>
+              <button className="btn btn-primary btn-full" onClick={handlePayment} disabled={loading}>
+                {loading ? "Processing..." : "Pay with M-PESA"}
+              </button>
+            </>
+          )}
+          {status === "processing" && (
+            <div style={{ textAlign: "center", padding: 32 }}>
+              <div className="spinner" style={{ margin: "0 auto 20px" }} />
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>STK Push Sent</div>
+              <div style={{ fontSize: 13, color: "var(--text-tertiary)" }}>
+                Check your phone and enter your PIN to complete payment
+              </div>
+            </div>
+          )}
+          {status === "success" && (
+            <div style={{ textAlign: "center", padding: 32 }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>Payment Successful!</div>
+              <div style={{ fontSize: 13, color: "var(--text-tertiary)" }}>
+                {Math.floor(amount / 10)} coins have been added to your account
+              </div>
+            </div>
+          )}
+          {status === "failed" && (
+            <div style={{ textAlign: "center", padding: 32 }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>❌</div>
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>Payment Failed</div>
+              <div style={{ fontSize: 13, color: "var(--text-tertiary)", marginBottom: 20 }}>
+                Please try again or use another payment method
+              </div>
+              <button className="btn btn-secondary" onClick={() => setStatus("idle")}>Try Again</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── ICONS ────────────────────────────────────────────────────────────────────
+const Icons = {
+  Home: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>,
+  Zap: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>,
+  Users: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+  Wallet: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>,
+  User: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>,
+  Copy: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M8 17.929H6c-1.105 0-2-.912-2-2.036V5.036C4 3.911 4.895 3 6 3h8c1.105 0 2 .911 2 2.036v1.866m-6 .17h8c1.105 0 2 .91 2 2.035v10.857C20 21.09 19.105 22 18 22h-8c-1.105 0-2-.911-2-2.036V9.107c0-1.124.895-2.036 2-2.036z"/></svg>,
+  Share: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>,
+  LogOut: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>,
+  Check: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>,
+  Arrow: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>,
+  Alert: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>,
+  WhatsApp: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21.5 12a9.5 9.5 0 0 1-9.5 9.5c-1.6 0-3.1-.4-4.5-1.1L3 21l1.6-4.5c-.7-1.4-1.1-2.9-1.1-4.5a9.5 9.5 0 0 1 9.5-9.5 9.5 9.5 0 0 1 9.5 9.5z"/><path d="M8.5 9.5h7M12 7v7"/></svg>,
+};
+
+// ─── PAGES ────────────────────────────────────────────────────────────────────
+
+// Landing Page
+function Landing({ setPage }: { setPage: (page: string) => void }) {
+  return (
+    <div className="app">
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+        <header style={{ padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--border)" }}>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, background: "var(--gradient-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>RewardHub</span>
+          <div style={{ display: "flex", gap: 12 }}>
+            <button className="btn btn-ghost btn-sm" onClick={() => setPage("login")}>Sign In</button>
+            <button className="btn btn-primary btn-sm" onClick={() => setPage("signup")}>Get Started</button>
+          </div>
+        </header>
+        
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "60px 24px", position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, var(--accent-green-glow), transparent 70%)", top: "50%", left: "50%", transform: "translate(-50%, -50%)", pointerEvents: "none" }} />
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(40px, 8vw, 72px)", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1.05, marginBottom: 20 }}>
+            Earn Rewards Through<br />
+            <span style={{ background: "var(--gradient-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Skills & Referrals</span>
+          </h1>
+          <p style={{ fontSize: "clamp(14px, 2.5vw, 18px)", color: "var(--text-secondary)", maxWidth: 480, marginBottom: 40 }}>
+            Join our community and start earning rewards through skill-based tasks, referrals, and more.
+          </p>
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
+            <button className="btn btn-primary btn-lg" onClick={() => setPage("signup")}>Start Earning Now <Icons.Arrow /></button>
+            <button className="btn btn-secondary btn-lg" onClick={() => setPage("login")}>Sign In</button>
+          </div>
+        </div>
+        
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 20, padding: "48px 24px", maxWidth: 1000, margin: "0 auto" }}>
+          {[
+            { icon: "🎯", title: "Skill-Based Tasks", desc: "Complete writing, editing, and learning tasks to earn rewards" },
+            { icon: "👥", title: "Referral Rewards", desc: "Earn commissions when friends join and purchase packages" },
+            { icon: "💳", title: "M-PESA Integration", desc: "Secure deposits and withdrawals via M-PESA Daraja API" },
+            { icon: "⚡", title: "Instant Earnings", desc: "Get paid immediately upon task completion" },
+          ].map(f => (
+            <div key={f.title} className="card" style={{ textAlign: "center", padding: 28 }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>{f.icon}</div>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, marginBottom: 6 }}>{f.title}</div>
+              <div style={{ fontSize: 13, color: "var(--text-tertiary)" }}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Login Page
+function Login({ setPage }: { setPage: (page: string) => void }) {
+  const { login } = useAuth();
+  const toast = useToast();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      await login(email, password);
+      toast({ title: "Welcome back!", type: "success" });
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div className="glass-card" style={{ maxWidth: 420, width: "100%", padding: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{ width: 48, height: 48, borderRadius: 12, background: "var(--gradient-primary)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 24 }}>💰</div>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Welcome Back</h2>
+          <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Sign in to your account</p>
+        </div>
+        
+        {error && (
+          <div className="alert alert-error" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: 12, marginBottom: 20, display: "flex", gap: 8, alignItems: "center" }}>
+            <Icons.Alert /> {error}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label className="input-label">Email</label>
+            <input className="input" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
+          </div>
+          <div className="input-group">
+            <label className="input-label">Password</label>
+            <input className="input" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
+          </div>
+          <button className="btn btn-primary btn-full" type="submit" disabled={loading}>
+            {loading ? "Signing in..." : "Sign In"}
+          </button>
+        </form>
+        
+        <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: "var(--text-tertiary)" }}>
+          Don't have an account? <a onClick={() => setPage("signup")} style={{ color: "var(--accent-green)", cursor: "pointer", fontWeight: 600 }}>Sign up</a>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Signup Page
+function Signup({ setPage }: { setPage: (page: string) => void }) {
+  const { signup } = useAuth();
+  const toast = useToast();
+  const [form, setForm] = useState({ username: "", email: "", password: "", confirm: "", referral: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    
+    if (form.password !== form.confirm) {
+      setError("Passwords do not match");
+      return;
+    }
+    if (form.password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      await signup(form.email, form.password, form.username, form.referral);
+      toast({ title: "Account created!", message: "Welcome to RewardHub!", type: "success" });
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div className="glass-card" style={{ maxWidth: 420, width: "100%", padding: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{ width: 48, height: 48, borderRadius: 12, background: "var(--gradient-primary)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 24 }}>🚀</div>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Create Account</h2>
+          <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Start earning rewards today</p>
+        </div>
+        
+        {error && (
+          <div className="alert alert-error" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: 12, marginBottom: 20, display: "flex", gap: 8, alignItems: "center" }}>
+            <Icons.Alert /> {error}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label className="input-label">Username</label>
+            <input className="input" type="text" placeholder="coolusername" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} required />
+          </div>
+          <div className="input-group">
+            <label className="input-label">Email</label>
+            <input className="input" type="email" placeholder="you@example.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+          </div>
+          <div className="input-group">
+            <label className="input-label">Password</label>
+            <input className="input" type="password" placeholder="Min 8 characters" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required />
+          </div>
+          <div className="input-group">
+            <label className="input-label">Confirm Password</label>
+            <input className="input" type="password" placeholder="••••••••" value={form.confirm} onChange={e => setForm({ ...form, confirm: e.target.value })} required />
+          </div>
+          <div className="input-group">
+            <label className="input-label">Referral Code (Optional)</label>
+            <input className="input" type="text" placeholder="FRIEND-CODE" value={form.referral} onChange={e => setForm({ ...form, referral: e.target.value })} />
+          </div>
+          <button className="btn btn-primary btn-full" type="submit" disabled={loading}>
+            {loading ? "Creating account..." : "Create Account"}
+          </button>
+        </form>
+        
+        <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: "var(--text-tertiary)" }}>
+          Already have an account? <a onClick={() => setPage("login")} style={{ color: "var(--accent-green)", cursor: "pointer", fontWeight: 600 }}>Sign in</a>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Dashboard Page
+function Dashboard({ setPage }: { setPage: (page: string) => void }) {
+  const { user, refreshBalances } = useGlobalState();
+  const [mpesaModalOpen, setMpesaModalOpen] = useState(false);
+  
+  useEffect(() => {
+    refreshBalances();
+  }, [refreshBalances]);
+  
+  if (!user) return null;
+  
+  const withdrawalProgress = Math.min(100, (user.available_balance / 1500) * 100);
+  
+  return (
+    <div className="page">
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 4 }}>
+          Hey, {user.username} 👋
+        </h1>
+        <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>
+          {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+        </p>
+      </div>
+      
+      <div className="stats-grid">
+        <div className="stat-card green">
+          <div className="stat-label">Total Earned</div>
+          <div className="stat-value green">{user.total_earned.toLocaleString()} KSH</div>
+          <div className="stat-sub">All time</div>
+        </div>
+        <div className="stat-card cyan">
+          <div className="stat-label">Available</div>
+          <div className="stat-value cyan">{user.available_balance.toLocaleString()} KSH</div>
+          <div className="stat-sub">Ready to withdraw</div>
+        </div>
+        <div className="stat-card purple">
+          <div className="stat-label">Coins</div>
+          <div className="stat-value purple">{user.coins_balance.toLocaleString()}</div>
+          <div className="stat-sub">For tasks</div>
+        </div>
+        <div className="stat-card amber">
+          <div className="stat-label">Referrals</div>
+          <div className="stat-value amber">{user.total_referrals}</div>
+          <div className="stat-sub">Total invites</div>
+        </div>
+      </div>
+      
+      {!user.has_purchased_package && (
+        <div className="card" style={{ marginBottom: 24, background: "linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.05))", borderColor: "rgba(16,185,129,0.3)" }}>
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>🔓 Unlock Earning Features</div>
+              <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>Purchase a package to start completing tasks</div>
+            </div>
+            <button className="btn btn-primary btn-sm" onClick={() => setPage("deposits")}>Buy Package →</button>
+          </div>
+          <div style={{ fontSize: 12 }}>
+            <div className="flex gap-8 mb-4">
+              <span>✅ Access all tasks</span>
+              <span>✅ Earn KSH rewards</span>
+              <span>✅ Build referral network</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {user.available_balance < 1500 && user.has_purchased_package && (
+        <div className="card mb-16">
+          <div className="flex justify-between mb-8">
+            <span style={{ fontSize: 13, fontWeight: 600 }}>Withdrawal Progress</span>
+            <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{user.available_balance.toLocaleString()} / 1,500 KSH</span>
+          </div>
+          <div className="progress-wrap" style={{ background: "var(--bg-tertiary)", borderRadius: 100, height: 8, overflow: "hidden" }}>
+            <div className="progress-bar" style={{ width: `${withdrawalProgress}%` }} />
+          </div>
+          <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 8 }}>
+            Need {(1500 - user.available_balance).toLocaleString()} KSH more to withdraw
+          </div>
+        </div>
+      )}
+      
+      <div style={{ display: "grid", gap: 12, marginBottom: 24 }}>
+        {[
+          { title: "Complete Tasks", desc: "Earn KSH by completing skill-based tasks", icon: "🎯", page: "tasks", color: "var(--accent-cyan)" },
+          { title: "Buy Coins", desc: "Purchase packages to get coins and unlock tasks", icon: "⚡", page: "deposits", color: "var(--accent-purple)" },
+          { title: "Refer Friends", desc: "Invite friends and earn rewards", icon: "👥", page: "referrals", color: "var(--accent-green)" },
+          { title: "Withdraw Earnings", desc: "Cash out your earnings via M-PESA", icon: "💸", page: "wallet", color: "var(--accent-amber)" },
+        ].map(c => (
+          <div key={c.page} className="card" style={{ cursor: "pointer" }} onClick={() => setPage(c.page)}>
+            <div className="flex items-center gap-12">
+              <div style={{ fontSize: 28, width: 48, height: 48, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-tertiary)", borderRadius: 12, flexShrink: 0 }}>{c.icon}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, marginBottom: 2 }}>{c.title}</div>
+                <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{c.desc}</div>
+              </div>
+              <Icons.Arrow />
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <MpesaModal isOpen={mpesaModalOpen} onClose={() => setMpesaModalOpen(false)} amount={0} onSuccess={() => {}} />
+    </div>
+  );
+}
+
+// Tasks Page
+function Tasks() {
+  const { user, tasks, completeTask, refreshBalances } = useGlobalState();
+  const toast = useToast();
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const taskCompletions = storage.get<{ task_id: string }[]>(`rh_task_completions_${user?.id}`) || [];
+  
+  const filteredTasks = tasks.filter(task => {
+    if (selectedCategory !== "all" && task.category !== selectedCategory) return false;
+    return task.is_active;
+  });
+  
+  const handleCompleteTask = async (task: Task) => {
+    if (!user) return;
+    
+    const alreadyCompleted = taskCompletions.some(tc => tc.task_id === task.id);
+    if (alreadyCompleted) {
+      toast({ title: "Already completed", message: "You've already done this task", type: "error" });
+      return;
+    }
+    
+    if (user.coins_balance < task.coin_cost) {
+      toast({ title: "Insufficient coins", message: `Need ${task.coin_cost} coins, have ${user.coins_balance}`, type: "error" });
+      return;
+    }
+    
+    const success = await completeTask(task);
+    if (success) {
+      toast({ title: "Task completed! 🎉", message: `+${task.reward} KSH added`, type: "success" });
+      refreshBalances();
+      
+      const newCompletions = [...taskCompletions, { task_id: task.id }];
+      storage.set(`rh_task_completions_${user.id}`, newCompletions);
+    }
+  };
+  
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "social": return "task-badge social";
+      case "writing": return "task-badge writing";
+      case "editing": return "task-badge editing";
+      case "listening": return "task-badge listening";
+      case "learning": return "task-badge learning";
+      default: return "task-badge social";
+    }
+  };
+  
+  if (!user) return null;
+  
+  return (
+    <div className="page">
+      <div style={{ marginBottom: 24 }}>
+        <h1 className="section-title" style={{ fontSize: 28, fontWeight: 800 }}>Tasks</h1>
+        <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Complete tasks to earn KSH rewards</p>
+      </div>
+      
+      <div className="card-sm" style={{ background: "var(--bg-tertiary)", marginBottom: 20, padding: 16 }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <span style={{ fontSize: 24 }}>⚡</span>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>Your Coins</div>
+              <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{user.coins_balance} coins available</div>
+            </div>
+          </div>
+          <button className="btn btn-secondary btn-sm" onClick={() => {}}>Buy More</button>
+        </div>
+      </div>
+      
+      <div className="cat-pills" style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
+        {["all", "social", "writing", "editing", "listening", "learning"].map(cat => (
+          <button
+            key={cat}
+            className={`cat-pill ${selectedCategory === cat ? "active" : ""}`}
+            onClick={() => setSelectedCategory(cat)}
+            style={{
+              padding: "8px 16px",
+              borderRadius: 100,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              border: "1px solid var(--border)",
+              background: selectedCategory === cat ? "var(--accent-green)" : "transparent",
+              color: selectedCategory === cat ? "#fff" : "var(--text-secondary)",
+            }}
+          >
+            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+          </button>
+        ))}
+      </div>
+      
+      {filteredTasks.map(task => {
+        const completed = taskCompletions.some(tc => tc.task_id === task.id);
+        const canComplete = !completed && user.coins_balance >= task.coin_cost && user.has_purchased_package;
+        
+        return (
+          <div key={task.id} className={`task-card ${completed ? "completed" : ""}`}>
+            <div className="flex justify-between mb-8">
+              <div>
+                <div className="task-title" style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>{task.title}</div>
+                <div className="task-meta" style={{ display: "flex", gap: 8, fontSize: 12, color: "var(--text-tertiary)" }}>
+                  <span className={getCategoryColor(task.category)}>{task.category}</span>
+                  <span>• {task.difficulty}</span>
+                </div>
+              </div>
+              {completed && <span className="badge badge-green"><Icons.Check /> Done</span>}
+            </div>
+            
+            <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 12 }}>{task.description}</p>
+            
+            <div className="flex gap-16 mb-12">
+              <span className="text-green font-bold">🏆 {task.reward} KSH</span>
+              <span className="text-purple font-bold">⚡ {task.coin_cost} coins</span>
+            </div>
+            
+            <button
+              className="btn btn-full"
+              disabled={!canComplete}
+              onClick={() => handleCompleteTask(task)}
+              style={{
+                background: completed ? "rgba(16,185,129,0.1)" : canComplete ? "var(--gradient-primary)" : "var(--bg-tertiary)",
+                color: completed ? "var(--accent-green)" : canComplete ? "#fff" : "var(--text-tertiary)",
+              }}
+            >
+              {completed ? "Completed" : canComplete ? "Complete Task" : `Need ${task.coin_cost} coins`}
+            </button>
+          </div>
+        );
+      })}
+      
+      {filteredTasks.length === 0 && (
+        <div className="text-center" style={{ padding: 48 }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div>
+          <div style={{ fontWeight: 600, marginBottom: 8 }}>No tasks available</div>
+          <div style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Check back later for new tasks</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Referrals Page
+function Referrals() {
+  const { user, referrals } = useGlobalState();
+  const toast = useToast();
+  
+  const userReferrals = referrals.filter(r => r.referrer_id === user?.id);
+  const verifiedReferrals = userReferrals.filter(r => r.status === "verified");
+  const totalEarned = verifiedReferrals.reduce((sum, r) => sum + r.reward_earned, 0);
+  
+  const copyReferralCode = () => {
+    if (user?.referral_code) {
+      navigator.clipboard.writeText(user.referral_code);
+      toast({ title: "Copied!", message: "Referral code copied to clipboard", type: "success" });
+    }
+  };
+  
+  const shareWhatsApp = () => {
+    const text = `Join RewardHub with my referral code: ${user?.referral_code}. Start earning rewards today!`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+  
+  if (!user) return null;
+  
+  return (
+    <div className="page">
+      <div style={{ marginBottom: 24 }}>
+        <h1 className="section-title" style={{ fontSize: 28, fontWeight: 800 }}>Referrals</h1>
+        <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Invite friends and earn rewards</p>
+      </div>
+      
+      <div className="card" style={{ marginBottom: 20, background: "linear-gradient(135deg, rgba(139,92,246,0.1), rgba(6,182,212,0.05))", borderColor: "rgba(139,92,246,0.3)" }}>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 12, color: "var(--text-tertiary)", marginBottom: 4 }}>Your Referral Code</div>
+          <div className="flex items-center justify-between" style={{ background: "var(--bg-tertiary)", padding: "12px 16px", borderRadius: 12 }}>
+            <code style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1 }}>{user.referral_code}</code>
+            <div className="flex gap-8">
+              <button className="btn btn-ghost btn-sm" onClick={copyReferralCode}><Icons.Copy /></button>
+              <button className="btn btn-ghost btn-sm" onClick={shareWhatsApp}><Icons.WhatsApp /></button>
+            </div>
+          </div>
+        </div>
+        
+        <div style={{ textAlign: "center", padding: 12, background: "var(--bg-tertiary)", borderRadius: 12 }}>
+          <div style={{ fontSize: 13, marginBottom: 8 }}>How it works:</div>
+          <div className="flex justify-between" style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
+            <span>1. Share your code</span>
+            <Icons.Arrow style={{ transform: "rotate(180deg)" }} />
+            <span>2. Friend signs up</span>
+            <Icons.Arrow style={{ transform: "rotate(180deg)" }} />
+            <span>3. Friend buys package</span>
+            <Icons.Arrow style={{ transform: "rotate(180deg)" }} />
+            <span>4. You earn rewards</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="stats-grid mb-20">
+        <div className="stat-card purple">
+          <div className="stat-label">Total Referrals</div>
+          <div className="stat-value purple">{userReferrals.length}</div>
+        </div>
+        <div className="stat-card green">
+          <div className="stat-label">Verified</div>
+          <div className="stat-value green">{verifiedReferrals.length}</div>
+        </div>
+        <div className="stat-card amber">
+          <div className="stat-label">Earned</div>
+          <div className="stat-value amber">{totalEarned.toLocaleString()} KSH</div>
+        </div>
+      </div>
+      
+      {userReferrals.length === 0 ? (
+        <div className="text-center" style={{ padding: 48, background: "var(--surface)", borderRadius: 16 }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>👥</div>
+          <div style={{ fontWeight: 600, marginBottom: 8 }}>No referrals yet</div>
+          <div style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Share your code and start earning!</div>
+        </div>
+      ) : (
+        <div className="card">
+          <div style={{ fontWeight: 700, marginBottom: 16 }}>Referral History</div>
+          <div className="table-wrap" style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                  <th style={{ textAlign: "left", padding: "12px 0" }}>User</th>
+                  <th style={{ textAlign: "left", padding: "12px 0" }}>Status</th>
+                  <th style={{ textAlign: "right", padding: "12px 0" }}>Reward</th>
+                </tr>
+              </thead>
+              <tbody>
+                {userReferrals.map(ref => (
+                  <tr key={ref.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                    <td style={{ padding: "12px 0", fontWeight: 500 }}>{ref.referee_id.slice(-8)}</td>
+                    <td style={{ padding: "12px 0" }}>
+                      <span className={`badge ${ref.status === "verified" ? "badge-green" : "badge-amber"}`}>{ref.status}</span>
+                    </td>
+                    <td style={{ padding: "12px 0", textAlign: "right", fontWeight: 600, color: "var(--accent-green)" }}>{ref.reward_earned} KSH</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Wallet Page
+function Wallet() {
+  const { user, requestWithdrawal, refreshBalances } = useGlobalState();
+  const toast = useToast();
+  const [amount, setAmount] = useState("");
+  const [method, setMethod] = useState("mpesa");
+  const [loading, setLoading] = useState(false);
+  const withdrawals = storage.get<Withdrawal[]>(`rh_withdrawals_${user?.id}`) || [];
+  
+  const handleWithdrawal = async () => {
+    if (!user) return;
+    
+    const amt = parseFloat(amount);
+    if (isNaN(amt) || amt < 1500) {
+      toast({ title: "Invalid amount", message: "Minimum withdrawal is 1,500 KSH", type: "error" });
+      return;
+    }
+    if (amt > user.available_balance) {
+      toast({ title: "Insufficient balance", message: "You don't have enough funds", type: "error" });
+      return;
+    }
+    
+    setLoading(true);
+    const success = await requestWithdrawal(amt, method);
+    setLoading(false);
+    
+    if (success) {
+      toast({ title: "Withdrawal requested!", message: "Admin will process your request", type: "success" });
+      setAmount("");
+      refreshBalances();
+    }
+  };
+  
+  if (!user) return null;
+  
+  return (
+    <div className="page">
+      <div style={{ marginBottom: 24 }}>
+        <h1 className="section-title" style={{ fontSize: 28, fontWeight: 800 }}>Wallet</h1>
+        <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Manage your earnings and withdrawals</p>
+      </div>
+      
+      <div className="stats-grid mb-20">
+        <div className="stat-card green">
+          <div className="stat-label">Available</div>
+          <div className="stat-value green">{user.available_balance.toLocaleString()} KSH</div>
+        </div>
+        <div className="stat-card cyan">
+          <div className="stat-label">Pending</div>
+          <div className="stat-value cyan">{user.pending_balance.toLocaleString()} KSH</div>
+        </div>
+        <div className="stat-card purple">
+          <div className="stat-label">Coins</div>
+          <div className="stat-value purple">{user.coins_balance}</div>
+        </div>
+        <div className="stat-card amber">
+          <div className="stat-label">Total Earned</div>
+          <div className="stat-value amber">{user.total_earned.toLocaleString()} KSH</div>
+        </div>
+      </div>
+      
+      {user.available_balance >= 1500 && (
+        <div className="card" style={{ marginBottom: 20 }}>
+          <div style={{ fontWeight: 700, marginBottom: 16 }}>Request Withdrawal</div>
+          <div className="input-group">
+            <label className="input-label">Amount (KSH)</label>
+            <input className="input" type="number" placeholder="1500" min="1500" max={user.available_balance} value={amount} onChange={e => setAmount(e.target.value)} />
+          </div>
+          <div className="input-group">
+            <label className="input-label">Payment Method</label>
+            <select className="input select" value={method} onChange={e => setMethod(e.target.value)}>
+              <option value="mpesa">M-PESA</option>
+              <option value="bank">Bank Transfer</option>
+            </select>
+          </div>
+          <button className="btn btn-primary btn-full" onClick={handleWithdrawal} disabled={loading}>
+            {loading ? "Processing..." : "Request Withdrawal"}
+          </button>
+        </div>
+      )}
+      
+      {user.available_balance < 1500 && (
+        <div className="card" style={{ marginBottom: 20, background: "rgba(245,158,11,0.1)", borderColor: "rgba(245,158,11,0.3)" }}>
+          <div className="flex items-center gap-12">
+            <span style={{ fontSize: 24 }}>🔒</span>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>Minimum Withdrawal: 1,500 KSH</div>
+              <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>You need {(1500 - user.available_balance).toLocaleString()} KSH more to withdraw</div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {withdrawals.length > 0 && (
+        <div className="card">
+          <div style={{ fontWeight: 700, marginBottom: 16 }}>Withdrawal History</div>
+          <div className="table-wrap" style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                  <th style={{ textAlign: "left", padding: "12px 0" }}>Amount</th>
+                  <th style={{ textAlign: "left", padding: "12px 0" }}>Status</th>
+                  <th style={{ textAlign: "right", padding: "12px 0" }}>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawals.map(w => (
+                  <tr key={w.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                    <td style={{ padding: "12px 0", fontWeight: 600 }}>{w.amount.toLocaleString()} KSH</td>
+                    <td style={{ padding: "12px 0" }}>
+                      <span className={`badge ${
+                        w.status === "completed" ? "badge-green" :
+                        w.status === "pending" ? "badge-amber" :
+                        "badge-red"
+                      }`}>{w.status}</span>
+                    </td>
+                    <td style={{ padding: "12px 0", textAlign: "right", color: "var(--text-tertiary)" }}>
+                      {new Date(w.created_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Deposits Page
+function Deposits({ setPage }: { setPage: (page: string) => void }) {
+  const { user, packages, purchasePackage, refreshBalances } = useGlobalState();
+  const toast = useToast();
+  const [loading, setLoading] = useState<string | null>(null);
+  const [mpesaModalOpen, setMpesaModalOpen] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
+  
+  const handlePurchase = async (pkg: Package) => {
+    setLoading(pkg.id);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    await purchasePackage(pkg);
+    setLoading(null);
+    toast({ title: "Purchase successful!", message: `${pkg.coins} coins added to your account`, type: "success" });
+    refreshBalances();
+  };
+  
+  const handleMpesaPurchase = (pkg: Package) => {
+    setSelectedPackage(pkg);
+    setMpesaModalOpen(true);
+  };
+  
+  if (!user) return null;
+  
+  return (
+    <div className="page">
+      <button className="btn btn-ghost btn-sm mb-16" onClick={() => setPage("dashboard")}>← Back</button>
+      
+      <div style={{ marginBottom: 24 }}>
+        <h1 className="section-title" style={{ fontSize: 28, fontWeight: 800 }}>Buy Coins</h1>
+        <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Purchase packages to get coins and unlock tasks</p>
+      </div>
+      
+      <div className="card-sm" style={{ background: "var(--bg-tertiary)", marginBottom: 20, padding: 16 }}>
+        <div className="flex items-center justify-between">
+          <div>
+            <div style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Current Balance</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: "var(--accent-cyan)" }}>{user.coins_balance} coins</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Available KSH</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: "var(--accent-green)" }}>{user.available_balance.toLocaleString()} KSH</div>
+          </div>
+        </div>
+      </div>
+      
+      <div style={{ display: "grid", gap: 16 }}>
+        {packages.map(pkg => (
+          <div key={pkg.id} className={`card ${pkg.popular ? "popular" : ""}`} style={{ position: "relative", overflow: "hidden" }}>
+            {pkg.popular && (
+              <div className="badge badge-purple" style={{ position: "absolute", top: 16, right: 16 }}>Most Popular</div>
+            )}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 800 }}>{pkg.name}</div>
+              <div style={{ fontSize: 32, fontWeight: 800, color: "var(--accent-cyan)", marginTop: 8 }}>
+                {pkg.ksh.toLocaleString()} <span style={{ fontSize: 14, color: "var(--text-tertiary)" }}>KSH</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-8" style={{ background: "var(--bg-tertiary)", padding: "12px 16px", borderRadius: 12, marginBottom: 16 }}>
+              <span style={{ fontSize: 24 }}>⚡</span>
+              <span style={{ fontWeight: 700, fontSize: 20 }}>{pkg.coins} coins</span>
+            </div>
+            <button
+              className="btn btn-full"
+              onClick={() => handleMpesaPurchase(pkg)}
+              disabled={loading !== null}
+              style={{ background: "var(--gradient-primary)", color: "#fff" }}
+            >
+              {loading === pkg.id ? "Processing..." : `Pay ${pkg.ksh} KSH →`}
+            </button>
+          </div>
+        ))}
+      </div>
+      
+      {selectedPackage && (
+        <MpesaModal
+          isOpen={mpesaModalOpen}
+          onClose={() => setMpesaModalOpen(false)}
+          amount={selectedPackage.ksh}
+          onSuccess={() => {
+            purchasePackage(selectedPackage);
+            refreshBalances();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// Account Page
+function Account({ setPage }: { setPage: (page: string) => void }) {
+  const { user } = useGlobalState();
+  const { logout } = useAuth();
+  const toast = useToast();
+  
+  const copyReferralCode = () => {
+    if (user?.referral_code) {
+      navigator.clipboard.writeText(user.referral_code);
+      toast({ title: "Copied!", type: "success" });
+    }
+  };
+  
+  if (!user) return null;
+  
+  return (
+    <div className="page">
+      <div className="text-center mb-24">
+        <div style={{ width: 80, height: 80, borderRadius: "50%", background: "var(--gradient-primary)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 32, fontWeight: 700, color: "#fff" }}>
+          {user.username[0].toUpperCase()}
+        </div>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700 }}>{user.username}</div>
+        <div style={{ fontSize: 13, color: "var(--text-tertiary)" }}>{user.email}</div>
+        {user.is_admin && <span className="badge badge-purple" style={{ marginTop: 8 }}>Admin</span>}
+      </div>
+      
+      <div className="card mb-16">
+        <div style={{ fontWeight: 700, marginBottom: 16 }}>Account Details</div>
+        <div className="flex justify-between" style={{ padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
+          <div>
+            <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>Referral Code</div>
+            <div style={{ fontWeight: 600 }}>{user.referral_code}</div>
+          </div>
+          <button className="btn btn-ghost btn-sm" onClick={copyReferralCode}><Icons.Copy /></button>
+        </div>
+        <div style={{ padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
+          <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>Member Since</div>
+          <div style={{ fontWeight: 600 }}>{new Date(user.created_at).toLocaleDateString()}</div>
+        </div>
+        <div style={{ padding: "12px 0" }}>
+          <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>Account Status</div>
+          <div style={{ fontWeight: 600, color: user.has_purchased_package ? "var(--accent-green)" : "var(--accent-amber)" }}>
+            {user.has_purchased_package ? "Active" : "Package Required"}
+          </div>
+        </div>
+      </div>
+      
+      {user.is_admin && (
+        <div className="card mb-16" style={{ cursor: "pointer" }} onClick={() => setPage("admin")}>
+          <div className="flex items-center gap-12">
+            <span style={{ fontSize: 24 }}>⚙️</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700 }}>Admin Panel</div>
+              <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>Manage users, tasks, and withdrawals</div>
+            </div>
+            <Icons.Arrow />
+          </div>
+        </div>
+      )}
+      
+      <button className="btn btn-danger btn-full" onClick={logout}>
+        <Icons.LogOut /> Sign Out
+      </button>
+    </div>
+  );
+}
+
+// Admin Page
+function Admin({ setPage }: { setPage: (page: string) => void }) {
+  const { user, tasks, withdrawals, referrals, refreshBalances } = useGlobalState();
+  const [activeTab, setActiveTab] = useState<"users" | "tasks" | "withdrawals" | "referrals">("users");
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const toast = useToast();
+  
+  useEffect(() => {
+    const users = storage.get<User[]>("rh_all_users") || [];
+    setAllUsers(users);
+  }, []);
+  
+  const toggleUserBan = (userId: string) => {
+    const updated = allUsers.map(u => u.id === userId ? { ...u, is_banned: !u.is_banned } : u);
+    setAllUsers(updated);
+    storage.set("rh_all_users", updated);
+    toast({ title: "User updated", type: "success" });
+  };
+  
+  const updateWithdrawalStatus = (withdrawalId: string, status: "completed" | "rejected") => {
+    const allWithdrawals = storage.get<Withdrawal[]>("rh_withdrawals") || [];
+    const updated = allWithdrawals.map(w => w.id === withdrawalId ? { ...w, status } : w);
+    storage.set("rh_withdrawals", updated);
+    toast({ title: "Withdrawal updated", type: "success" });
+    refreshBalances();
+  };
+  
+  if (!user?.is_admin) {
+    setPage("dashboard");
+    return null;
+  }
+  
+  const pendingWithdrawals = withdrawals.filter(w => w.status === "pending");
+  
+  return (
+    <div className="page">
+      <button className="btn btn-ghost btn-sm mb-16" onClick={() => setPage("account")}>← Back</button>
+      
+      <div style={{ marginBottom: 24 }}>
+        <h1 className="section-title" style={{ fontSize: 28, fontWeight: 800 }}>Admin Panel</h1>
+        <p style={{ fontSize: 13, color: "var(--text-tertiary)" }}>Platform management</p>
+      </div>
+      
+      <div className="stats-grid mb-20">
+        <div className="stat-card">
+          <div className="stat-label">Total Users</div>
+          <div className="stat-value">{allUsers.length}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Pending Withdrawals</div>
+          <div className="stat-value amber">{pendingWithdrawals.length}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Total Referrals</div>
+          <div className="stat-value">{referrals.length}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Active Tasks</div>
+          <div className="stat-value">{tasks.filter(t => t.is_active).length}</div>
+        </div>
+      </div>
+      
+      <div className="flex gap-8 mb-20" style={{ borderBottom: "1px solid var(--border)", paddingBottom: 8 }}>
+        {["users", "tasks", "withdrawals", "referrals"].map(tab => (
+          <button
+            key={tab}
+            className={`btn btn-sm ${activeTab === tab ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => setActiveTab(tab as any)}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
+      </div>
+      
+      {activeTab === "users" && (
+        <div className="card">
+          <div className="table-wrap" style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                  <th style={{ textAlign: "left", padding: "12px 0" }}>User</th>
+                  <th style={{ textAlign: "left", padding: "12px 0" }}>Balance</th>
+                  <th style={{ textAlign: "left", padding: "12px 0" }}>Coins</th>
+                  <th style={{ textAlign: "left", padding: "12px 0" }}>Status</th>
+                  <th style={{ textAlign: "right", padding: "12px 0" }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allUsers.map(u => (
+                  <tr key={u.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                    <td style={{ padding: "12px 0" }}>
+                      <div style={{ fontWeight: 600 }}>{u.username}</div>
+                      <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>{u.email}</div>
+                    </td>
+                    <td style={{ padding: "12px 0" }}>{u.available_balance.toLocaleString()} KSH</td>
+                    <td style={{ padding: "12px 0" }}>{u.coins_balance}</td>
+                    <td style={{ padding: "12px 0" }}>
+                      <span className={`badge ${u.is_banned ? "badge-red" : "badge-green"}`}>
+                        {u.is_banned ? "Banned" : "Active"}
+                      </span>
+                    </td>
+                    <td style={{ padding: "12px 0", textAlign: "right" }}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => toggleUserBan(u.id)}>
+                        {u.is_banned ? "Unban" : "Ban"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+      
+      {activeTab === "withdrawals" && (
+        <div className="card">
+          {pendingWithdrawals.length === 0 ? (
+            <div className="text-center" style={{ padding: 32, color: "var(--text-tertiary)" }}>No pending withdrawals</div>
+          ) : (
+            <div className="table-wrap" style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                    <th style={{ textAlign: "left", padding: "12px 0" }}>Amount</th>
+                    <th style={{ textAlign: "left", padding: "12px 0" }}>Method</th>
+                    <th style={{ textAlign: "left", padding: "12px 0" }}>Status</th>
+                    <th style={{ textAlign: "right", padding: "12px 0" }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {withdrawals.map(w => (
+                    <tr key={w.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                      <td style={{ padding: "12px 0", fontWeight: 600 }}>{w.amount.toLocaleString()} KSH</td>
+                      <td style={{ padding: "12px 0" }}>{w.payment_method}</td>
+                      <td style={{ padding: "12px 0" }}>
+                        <span className={`badge ${
+                          w.status === "completed" ? "badge-green" :
+                          w.status === "pending" ? "badge-amber" :
+                          "badge-red"
+                        }`}>{w.status}</span>
+                      </td>
+                      <td style={{ padding: "12px 0", textAlign: "right" }}>
+                        {w.status === "pending" && (
+                          <div className="flex gap-8 justify-end">
+                            <button className="btn btn-sm btn-primary" onClick={() => updateWithdrawalStatus(w.id, "completed")}>Approve</button>
+                            <button className="btn btn-sm btn-danger" onClick={() => updateWithdrawalStatus(w.id, "rejected")}>Reject</button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {activeTab === "referrals" && (
+        <div className="card">
+          <div className="table-wrap" style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                  <th style={{ textAlign: "left", padding: "12px 0" }}>Referrer</th>
+                  <th style={{ textAlign: "left", padding: "12px 0" }}>Referred</th>
+                  <th style={{ textAlign: "left", padding: "12px 0" }}>Status</th>
+                  <th style={{ textAlign: "right", padding: "12px 0" }}>Reward</th>
+                </tr>
+              </thead>
+              <tbody>
+                {referrals.map(ref => {
+                  const referrer = allUsers.find(u => u.id === ref.referrer_id);
+                  return (
+                    <tr key={ref.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                      <td style={{ padding: "12px 0" }}>{referrer?.username || "Unknown"}</td>
+                      <td style={{ padding: "12px 0" }}>{ref.referee_id.slice(-8)}</td>
+                      <td style={{ padding: "12px 0" }}>
+                        <span className={`badge ${ref.status === "verified" ? "badge-green" : "badge-amber"}`}>{ref.status}</span>
+                      </td>
+                      <td style={{ padding: "12px 0", textAlign: "right", color: "var(--accent-green)" }}>{ref.reward_earned} KSH</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Main App Component
+function App() {
+  const { user, loading } = useAuth();
+  const [currentPage, setCurrentPage] = useState("landing");
+  
+  useEffect(() => {
+    if (loading) return;
+    if (user && (currentPage === "landing" || currentPage === "login" || currentPage === "signup")) {
+      setCurrentPage("dashboard");
+    } else if (!user && (currentPage !== "landing" && currentPage !== "login" && currentPage !== "signup")) {
+      setCurrentPage("landing");
+    }
+  }, [user, loading, currentPage]);
+  
+  if (loading) {
+    return <div className="spinner" />;
+  }
+  
+  const renderPage = () => {
+    switch (currentPage) {
+      case "landing": return <Landing setPage={setCurrentPage} />;
+      case "login": return <Login setPage={setCurrentPage} />;
+      case "signup": return <Signup setPage={setCurrentPage} />;
+      case "dashboard": return <Dashboard setPage={setCurrentPage} />;
+      case "tasks": return <Tasks />;
+      case "referrals": return <Referrals />;
+      case "wallet": return <Wallet />;
+      case "deposits": return <Deposits setPage={setCurrentPage} />;
+      case "account": return <Account setPage={setCurrentPage} />;
+      case "admin": return <Admin setPage={setCurrentPage} />;
+      default: return <Dashboard setPage={setCurrentPage} />;
+    }
+  };
+  
+  const showBottomNav = user && !["landing", "login", "signup", "admin"].includes(currentPage);
+  const navItems = [
+    { id: "dashboard", label: "Home", icon: Icons.Home },
+    { id: "tasks", label: "Tasks", icon: Icons.Zap },
+    { id: "referrals", label: "Refer", icon: Icons.Users },
+    { id: "wallet", label: "Wallet", icon: Icons.Wallet },
+    { id: "account", label: "Account", icon: Icons.User },
+  ];
+  
+  return (
+    <div className="app">
+      <style>{CSS}</style>
+      
+      {user && (
+        <div className="topbar">
+          <span className="topbar-brand">RewardHub</span>
+          <BalanceWidget />
+        </div>
+      )}
+      
+      {renderPage()}
+      
+      {showBottomNav && (
+        <nav className="bottom-nav">
+          {navItems.map(item => (
+            <button
+              key={item.id}
+              className={`nav-item ${currentPage === item.id ? "active" : ""}`}
+              onClick={() => setCurrentPage(item.id)}
+            >
+              <item.icon />
+              <span className="nav-label">{item.label}</span>
+            </button>
+          ))}
+        </nav>
+      )}
+    </div>
+  );
+}
+
+// Root Component with Providers
+export default function Root() {
+  return (
+    <AuthProvider>
+      <GlobalStateProvider>
+        <ToastProvider>
+          <App />
+        </ToastProvider>
+      </GlobalStateProvider>
+    </AuthProvider>
+  );
+}
